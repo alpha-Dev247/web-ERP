@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .sidebar {
+            background-color: #F89D2F; /* Specific Orange for sidebar */
+            transition: width 0.3s ease-in-out;
+            border-top-right-radius: 1.5rem; /* rounded-3xl */
+            border-bottom-right-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            overflow-y: auto; /* Allow vertical scrolling if content overflows */
+            overflow-x: hidden; /* Prevent horizontal scroll when text is hidden */
+        }
+        .sidebar-collapsed {
+            width: 5rem; /* Collapsed width, slightly larger for icons */
+        }
+        .sidebar-expanded {
+            width: 16rem; /* Expanded width */
+        }
+        .sidebar-menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0.75rem;
+            color: #fff; /* White text for contrast on orange */
+            border-radius: 0.75rem; /* rounded-xl */
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            cursor: pointer;
+            text-decoration: none; /* Ensure links don't have default underline */
+        }
+        .sidebar-menu-item.active {
+            background-color: #D28528; /* Darker shade of F89D2F for active state */
+            color: #fff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+        }
+        .sidebar-menu-item:hover {
+            background-color: #D28528; /* Darker shade of F89D2F on hover */
+            color: #fff;
+        }
+        .main-content {
+            background-color: #f9fafb; /* Lighter background for main content */
+            border-radius: 1.5rem; /* rounded-3xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            padding: 1.5rem;
+        }
+        .placeholder-content {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+            text-align: center;
+            color: #4b5563; /* gray-700 */
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column; /* Allow content to stack */
+        }
+        .sidebar-title {
+            white-space: nowrap; /* Prevent text wrapping */
+            transition: opacity 0.3s ease-in-out;
+        }
+        .sidebar-collapsed .sidebar-title,
+        .sidebar-collapsed .menu-text {
+            opacity: 0;
+            width: 0; /* Collapse width to hide content visually */
+            overflow: hidden; /* Hide overflowing text */
+            display: none; /* Hide text completely to avoid layout issues */
+        }
+        /* Adjust icon size for sidebar */
+        .sidebar .sidebar-menu-item i {
+            font-size: 1.5rem; /* Make icons slightly larger for better visibility when collapsed */
+            min-width: 2.5rem; /* Ensure icon takes consistent space */
+            text-align: center;
+        }
+        /* Adjust spacing for collapsed sidebar icons */
+        .sidebar-collapsed .sidebar-menu-item {
+            justify-content: center; /* Center icons when text is hidden */
+            margin: 0.5rem auto; /* Center items horizontally */
+            width: calc(100% - 1.5rem); /* Adjust width to fit margin */
+        }
+        /* Header specific styles */
+        .header-content {
+            padding: 1rem 1.5rem; /* Smaller padding */
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .header-search-container {
+            position: relative;
+            flex-grow: 1; /* Allow search bar to take available space */
+            max-width: 400px; /* Limit max width of search bar */
+            margin-left: 1rem; /* Add some space next to "Welcome" */
+        }
+        .header-search-input {
+            padding-left: 2.5rem; /* Space for search icon */
+            padding-right: 1rem;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            border: 1px solid #d1d5db; /* gray-300 */
+            width: 100%;
+        }
+        .header-search-container i {
+            position: absolute;
+            left: 1rem; /* Adjust icon position within search bar */
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af; /* gray-400 */
+        }
+        .header-icon-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* Tailwind space-x-3 equivalent using gap */
+        }
+        .header-avatar {
+            width: 2.5rem; /* w-10 */
+            height: 2.5rem; /* h-10 */
+            border-radius: 9999px; /* rounded-full */
+            object-fit: cover;
+            background-color: #F89D2F; /* Specific Orange for avatar background */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        /* Specific icon colors changed to orange */
+        .fas.fa-dollar-sign.text-orange-500,
+        .text-orange-600 {
+            color: #F89D2F; /* Specific Orange for icons and links */
+        }
+        .focus\:ring-orange-600:focus {
+            --tw-ring-color: #F89D2F; /* Specific Orange for focus rings */
+        }
+        /* Keeping other card icon colors for contrast */
+        .fas.fa-users.text-blue-500 { color: #3b82f6; } /* blue-500 */
+        .fas.fa-tasks.text-green-500 { color: #22c55e; } /* green-500 */
+        .fas.fa-file-invoice.text-red-500 { color: #ef4444; } /* red-500 */
+        /* Activity dot colors */
+        .bg-green-500 { background-color: #22c55e; }
+        .bg-blue-500 { background-color: #3b82f6; }
+        .bg-yellow-500 { background-color: #eab308; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar flex flex-col flex-shrink-0 sidebar-expanded h-full">
+        <div class="p-6 text-white text-2xl font-bold flex items-center justify-center">
+            <i class="fas fa-book-open mr-2 text-3xl"></i>
+            <span class="sidebar-title">Smart ERP</span>
+        </div>
+        <nav class="flex-grow mt-8">
+            <ul class="space-y-2">
+                <!-- Removed Welcome menu item -->
+                <li>
+                    <a href="#" class="sidebar-menu-item active" data-target="dashboard">
+                        <i class="fas fa-th-large"></i>
+                        <span class="menu-text ml-3">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="sales administrator.html" class="sidebar-menu-item">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="menu-text ml-3">Sales Administrator</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-menu-item" data-target="vdo-production">
+                        <i class="fas fa-video"></i>
+                        <span class="menu-text ml-3">VDO Production</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-menu-item" data-target="finance">
+                        <i class="fas fa-dollar-sign"></i>
+                        <span class="menu-text ml-3">Finance</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-menu-item" data-target="database">
+                        <i class="fas fa-database"></i>
+                        <span class="menu-text ml-3">Database</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- This div contains the Settings and Logout items -->
+        <div class="p-6">
+            <a href="#" class="sidebar-menu-item">
+                <i class="fas fa-cog"></i>
+                <span class="menu-text ml-3">Settings</span>
+            </a>
+            <a href="#" class="sidebar-menu-item">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="menu-text ml-3">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col p-8 overflow-auto">
+        <!-- Header / Navbar -->
+        <header id="main-header" class="flex items-center justify-between header-content mb-8 bg-white">
+            <div class="flex items-center flex-grow">
+                <button id="toggleSidebar" class="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-600 mr-4">
+                    <i class="fas fa-bars text-gray-700"></i>
+                </button>
+                <h1 id="header-title" class="text-xl font-semibold text-gray-800"></h1>
+                <div id="dashboard-header-elements" class="flex items-center flex-grow ml-4">
+                    <div class="header-search-container">
+                        <input type="text" placeholder="Search..." class="header-search-input focus:outline-none focus:ring-2 focus:ring-orange-600">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="header-icon-group ml-4 flex-shrink-0">
+                        <button class="p-2 rounded-xl hover:bg-gray-100 text-gray-600">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div class="header-avatar">U</div>
+                        <span class="font-medium text-gray-700 hidden md:block">User Name</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area to load sections -->
+        <main id="main-content-area" class="flex-1 overflow-y-auto">
+            <!-- Removed Welcome Section -->
+
+            <!-- Dashboard Section (initially visible) -->
+            <section id="dashboard" class="content-section">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="card flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Sales</p>
+                            <h2 class="text-3xl font-bold text-gray-800">$1,234,567</h2>
+                        </div>
+                        <i class="fas fa-dollar-sign text-orange-500 text-4xl opacity-20"></i>
+                    </div>
+                    <div class="card flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">New Customers</p>
+                            <h2 class="text-3xl font-bold text-gray-800">543</h2>
+                        </div>
+                        <i class="fas fa-users text-blue-500 text-4xl opacity-20"></i>
+                    </div>
+                    <div class="card flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Projects in Progress</p>
+                            <h2 class="text-3xl font-bold text-gray-800">128</h2>
+                        </div>
+                        <i class="fas fa-tasks text-green-500 text-4xl opacity-20"></i>
+                    </div>
+                    <div class="card flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Pending Invoices</p>
+                            <h2 class="text-3xl font-bold text-gray-800">23</h2>
+                        </div>
+                        <i class="fas fa-file-invoice text-red-500 text-4xl opacity-20"></i>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 card">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Recent Activities</h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <div class="w-2 h-2 rounded-full bg-green-500 mt-2 mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Sale order #5432 processed.</p>
+                                    <p class="text-gray-500 text-sm">2 hours ago by John Doe</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="w-2 h-2 rounded-full bg-blue-500 mt-2 mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">New VDO project "Marketing Campaign X" initiated.</p>
+                                    <p class="text-gray-500 text-sm">Yesterday by Jane Smith</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <div class="w-2 h-2 rounded-full bg-yellow-500 mt-2 mr-3"></div>
+                                <div>
+                                    <p class="font-medium text-gray-800">Financial report Q1 2025 submitted.</p>
+                                    <p class="text-gray-500 text-sm">3 days ago by Finance Team</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="text-xl font-semibold mb-4 text-gray-800">Quick Links</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-orange-600 hover:underline">Add New Sale</a></li>
+                            <li><a href="#" class="text-orange-600 hover:underline">Create VDO Brief</a></li>
+                            <li><a href="#" class="text-orange-600 hover:underline">View All Invoices</a></li>
+                            <li><a href="#" class="text-orange-600 hover:underline">Manage Employee Database</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <div id="dynamic-content-placeholder" class="hidden placeholder-content">
+                <h2 class="text-2xl font-bold mb-4">Content for <span id="current-menu-name" class="font-bold"></span></h2>
+                <p>This section will be developed in a separate file to provide detailed information and functionality.</p>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const toggleSidebarBtn = document.getElementById('toggleSidebar');
+            const menuItems = document.querySelectorAll('.sidebar-menu-item');
+            // Removed welcomeSection variable
+            const dashboardSection = document.getElementById('dashboard');
+            const dynamicContentPlaceholder = document.getElementById('dynamic-content-placeholder');
+            const currentMenuNameSpan = document.getElementById('current-menu-name');
+            const sidebarTitle = document.querySelector('.sidebar-title');
+            const menuTexts = sidebar.querySelectorAll('.menu-text');
+
+            const headerTitle = document.getElementById('header-title');
+            const dashboardHeaderElements = document.getElementById('dashboard-header-elements');
+
+            // Function to show a specific content section or a placeholder
+            const showSection = (targetId) => {
+                // Hide all content sections initially
+                // Removed welcomeSection from here
+                dashboardSection.classList.add('hidden');
+                dynamicContentPlaceholder.classList.add('hidden');
+
+                // Update header dynamically
+                if (targetId === 'dashboard') {
+                    headerTitle.textContent = 'Welcome to Smart ERP'; // Set dashboard header title
+                    dashboardHeaderElements.classList.remove('hidden');
+                    dashboardSection.classList.remove('hidden');
+                } else {
+                    // Capitalize first letter of each word for display in header
+                    const displayName = targetId.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    headerTitle.textContent = displayName;
+                    dashboardHeaderElements.classList.add('hidden'); // Hide search/icons
+                    
+                    // No 'welcome' section to check anymore
+                    currentMenuNameSpan.textContent = displayName; // Set for placeholder
+                    dynamicContentPlaceholder.classList.remove('hidden');
+                }
+            };
+
+            // Event listener for sidebar menu items
+            menuItems.forEach(item => {
+                // Check if the item has a direct href (like "sales administrator.html")
+                // If it does, let the browser handle navigation directly.
+                // Otherwise, use the internal content loading logic.
+                if (item.getAttribute('href') === '#') {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault(); // Prevent default link behavior for internal links
+                        const targetId = item.dataset.target;
+
+                        // Remove active class from all items
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        // Add active class to the clicked item
+                        item.classList.add('active');
+
+                        // Show the corresponding section or placeholder
+                        showSection(targetId);
+                    });
+                } else {
+                    // For direct links (like sales administrator.html), ensure active state is set on click
+                    // before the navigation happens.
+                    item.addEventListener('click', () => {
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        // Browser will handle the navigation via href
+                    });
+                }
+            });
+
+            // Toggle sidebar functionality using the header button
+            toggleSidebarBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('sidebar-collapsed');
+                sidebar.classList.toggle('sidebar-expanded');
+
+                // Toggle visibility of the "Smart ERP" title
+                sidebarTitle.classList.toggle('hidden');
+
+                // Toggle visibility of text in menu items
+                menuTexts.forEach(text => text.classList.toggle('hidden'));
+            });
+
+            // Initial load: show the dashboard section by default
+            // Find the dashboard menu item and simulate a click to set initial state correctly
+            const initialMenuItem = document.querySelector('.sidebar-menu-item[data-target="dashboard"]');
+            if (initialMenuItem) {
+                initialMenuItem.classList.add('active'); // Ensure Dashboard is active on load
+                showSection('dashboard'); // Explicitly show dashboard on load
+            }
+
+
+            // Placeholder for Google Sheets integration
+            function loadDataFromGoogleSheets(sheetName) {
+                console.log(`Attempting to load data from Google Sheet: ${sheetName}`);
+                // In a real application, you would make a fetch request to a backend
+                // or use Google Sheets API directly (requires OAuth 2.0 for user authorization).
+                // Example:
+                /*
+                fetch(`YOUR_GOOGLE_SHEETS_API_ENDPOINT?sheet=${sheetName}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(`Data for ${sheetName}:`, data);
+                        // Process and display data
+                    })
+                    .catch(error => {
+                        console.error('Error loading data:', error);
+                        // Display user-friendly error message
+                        const errorMessage = document.createElement('div');
+                        errorMessage.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4';
+                        errorMessage.textContent = `Failed to load data for ${sheetName}. Please check the connection or try again.`;
+                        document.querySelector(`#${sheetName} .card`).appendChild(errorMessage);
+                    });
+                */
+                // For this demonstration, we'll just log a message.
+                displayMessage("Google Sheets integration requires backend setup and API keys, which are not part of this front-end demo.", "info");
+            }
+
+            function displayMessage(message, type = "info") {
+                const mainContent = document.querySelector('main');
+                let messageBox = document.getElementById('infoMessageBox');
+
+                if (!messageBox) {
+                    messageBox = document.createElement('div');
+                    messageBox.id = 'infoMessageBox';
+                    messageBox.className = 'fixed bottom-4 right-4 p-4 rounded-lg shadow-lg text-white z-50';
+                    mainContent.appendChild(messageBox);
+                }
+
+                messageBox.textContent = message;
+                messageBox.classList.remove('bg-green-500', 'bg-red-500', 'bg-blue-500'); // Clear previous styles
+                if (type === 'success') {
+                    messageBox.classList.add('bg-green-500');
+                } else if (type === 'error') {
+                    messageBox.classList.add('bg-red-500');
+                } else { // info
+                    messageBox.classList.add('bg-blue-500');
+                }
+
+                messageBox.style.display = 'block';
+
+                setTimeout(() => {
+                    messageBox.style.display = 'none';
+                }, 5000); // Hide after 5 seconds
+            }
+        });
+    </script>
+</body>
+</html>
