@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Records</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            padding: 1.5rem; /* Standard padding for content cards */
+        }
+        .section-header {
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 700; /* font-bold */
+            color: #1f2937; /* gray-900 */
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #F89D2F; /* Orange accent line */
+            padding-bottom: 0.5rem;
+        }
+        .detail-action-button {
+            background-color: #F89D2F; /* Specific Orange for buttons */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* font-semibold */
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .detail-action-button:hover {
+            background-color: #D28528; /* Darker orange on hover */
+        }
+        .detail-action-button.outline {
+            background-color: transparent;
+            color: #F89D2F;
+            border: 1px solid #F89D2F;
+            box-shadow: none;
+        }
+        .detail-action-button.outline:hover {
+            background-color: #ffe7d6; /* Light orange on hover */
+        }
+        
+        /* Form element styling */
+        .form-field {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-size: 0.9rem;
+            color: #374151; /* gray-700 */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .form-field:focus {
+            outline: none;
+            border-color: #F89D2F; /* Orange border on focus */
+            box-shadow: 0 0 0 3px rgba(248, 157, 47, 0.3); /* Orange ring on focus */
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            color: #4b5563; /* gray-600 */
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive grid for main sections */
+        .sales-records-grid {
+            display: grid;
+            gap: 1.5rem; /* Gap between cards */
+            grid-template-columns: repeat(1, minmax(0, 1fr)); /* Default to single column */
+        }
+        @media (min-width: 768px) { /* Medium screens */
+            .sales-records-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)); /* Two columns */
+            }
+        }
+        @media (min-width: 1024px) { /* Large screens */
+            .sales-records-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr)); /* Four columns */
+            }
+        }
+        /* Specific column spans for larger sections */
+        .col-span-2 {
+            grid-column: span 2 / span 2;
+        }
+        @media (min-width: 1024px) {
+            .lg\:col-span-2 {
+                grid-column: span 2 / span 2;
+            }
+            .lg\:col-span-1 {
+                grid-column: span 1 / span 1;
+            }
+            .lg\:col-start-3 {
+                grid-column-start: 3;
+            }
+            .lg\:row-start-1 {
+                grid-row-start: 1;
+            }
+        }
+
+        /* Course section specific styling */
+        .course-table-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+            overflow: auto; /* Changed from hidden to auto for scrollability */
+            flex-grow: 1; /* Allow it to grow in flex container */
+            display: flex;
+            flex-direction: column; /* Organize content vertically */
+        }
+        .course-table-wrapper {
+            flex-grow: 1;
+            overflow-y: auto; /* Enable vertical scrolling within the table wrapper */
+        }
+        .course-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        .course-table th, .course-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap; /* Prevent wrapping in table cells */
+        }
+        .course-table thead {
+            background-color: #f9fafb;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            position: sticky; /* Make header sticky */
+            top: 0; /* Stick to the top */
+            z-index: 1; /* Ensure it stays above scrolling content */
+        }
+        .course-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .course-table tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+
+        /* Message Box for notifications */
+        .message-box {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            color: white;
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
+        .message-box.info { background-color: #3b82f6; } /* blue-500 */
+        .message-box.success { background-color: #22c55e; } /* green-500 */
+        .message-box.error { background-color: #ef4444; } /* red-500 */
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="container mx-auto">
+        <div class="mb-6">
+            <a href="Sales Administrator.html" class="detail-action-button outline">
+                <i class="fas fa-arrow-left"></i> Back to Sales Administrator
+            </a>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Sales Records</h1>
+
+        <div class="sales-records-grid">
+
+            <!-- Section 1: ค้นหาข้อมูลนักเรียน -->
+            <div class="card lg:col-span-1">
+                <h2 class="section-header">1.ค้นหาข้อมูลนักเรียน</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="student-id-card" class="form-label">เลขประจำตัวประชาชน</label>
+                        <input type="text" id="student-id-card" class="form-field" placeholder="กรอกเลขประจำตัวประชาชน">
+                    </div>
+                    <div>
+                        <label for="student-code" class="form-label">รหัสนักเรียน</label>
+                        <input type="text" id="student-code" class="form-field" placeholder="">
+                    </div>
+                    <div>
+                        <label for="student-name" class="form-label">ชื่อจริง</label>
+                        <input type="text" id="student-name" class="form-field" placeholder="" readonly>
+                    </div>
+                    <div>
+                        <label for="student-surname" class="form-label">นามสกุล</label>
+                        <input type="text" id="student-surname" class="form-field" placeholder="" readonly>
+                    </div>
+                    <div>
+                        <label for="student-nickname" class="form-label">ชื่อเล่น</label>
+                        <input type="text" id="student-nickname" class="form-field" placeholder="กรอกชื่อเล่นกรณีไม่อยู่ในฐานข้อมูล">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: รายละเอียดการสมัคร -->
+            <div class="card lg:col-span-1">
+                <h2 class="section-header">2.รายละเอียดการสมัคร</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="student-status" class="form-label">สถานะนักเรียน</label>
+                        <select id="student-status" class="form-field">
+                            <option value="">เลือกสถานะ</option>
+                            <option value="old">เก่า</option>
+                            <option value="new">ใหม่</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="application-type" class="form-label">รูปแบบการสมัคร</label>
+                        <select id="application-type" class="form-field">
+                            <option value="">เลือกรูปแบบการสมัคร</option>
+                            <option value="Line">Line</option>
+                            <option value="Walk in">Walk in</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="academic-year" class="form-label">ปีการศึกษา</label>
+                        <select id="academic-year" class="form-field">
+                            <option value="">เลือกปีการศึกษา</option>
+                            <option value="2567">2567</option>
+                            <option value="2568">2568</option>
+                            <option value="2569">2569</option>
+                            <option value="2570">2570</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="branch" class="form-label">สาขา</label>
+                        <select id="branch" class="form-field">
+                            <option value="">เลือกสาขา</option>
+                            <option value="megabangna">สาขาเมกาบางนา</option>
+                            <option value="sukhapiban3">สาขาสุขาภิบาล 3</option>
+                            <option value="megabangna-off-account">สาขาเมกาบางนา (นอกบัญชี)</option>
+                            <option value="sukhapiban3-off-account">สาขาสุขาภิบาล 3 (นอกบัญชี)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="application-date" class="form-label">วันที่สมัคร</label>
+                        <input type="date" id="application-date" class="form-field">
+                    </div>
+                    <div>
+                        <label for="program" class="form-label">โปรแกรม</label>
+                        <select id="program" class="form-field">
+                            <option value="">เลือกโปรแกรม</option>
+                            <option value="ALC">ALC</option>
+                            <option value="TCH">TCH</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="Season" class="form-label">ซี่ซั่น</label>
+                        <select id="Season" class="form-field">
+                            <option value="">เลือกซีซั่น</option>
+                            <option value="S1">1</option>
+                            <option value="S2">2</option>
+                            <option value="S3">3</option>
+                            <option value="S4">4</option>
+                            <option value="All">ทั้งปี</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="class" class="form-label">ระดับ</label>
+                        <select id="class" class="form-field">
+                            <option value="">เลือกชั้น</option>
+                            <option value="p6">ป.6</option>
+                            <option value="m3">ม.3</option>
+                            <option value="m4">ม.4</option>
+                            <option value="m5">ม.5</option>
+                            <option value="m6">ม.6</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: วิชาที่สมัคร -->
+            <div class="card lg:col-span-2 lg:col-start-3 lg:row-start-1 flex flex-col">
+                <h2 class="section-header">3.วิชาที่สมัคร</h2>
+                <!-- Course selection and add area -->
+                <div class="flex items-end gap-2 mb-4">
+                    <div class="flex-grow">
+                        <label for="course-select" class="form-label">เลือกวิชาจากฐานข้อมูล</label>
+                        <select id="course-select" class="form-field">
+                            <option value="">กำลังโหลดวิชา...</option>
+                        </select>
+                    </div>
+                    <button id="add-course-button" class="detail-action-button bg-orange-500 hover:bg-orange-600 px-4 py-2">
+                        <i class="fas fa-plus"></i> เพิ่ม
+                    </button>
+                </div>
+                
+                <!-- Course table -->
+                <div class="course-table-container">
+                    <div class="course-table-wrapper">
+                        <table class="course-table">
+                            <thead>
+                                <tr>
+                                    <th>รหัสคอร์ส</th>
+                                    <th>ชื่อคอร์ส</th>
+                                    <th>ราคา</th>
+                                    <th>หน่วย</th>
+                                    <th>ลบ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="selected-courses-table-body">
+                                <!-- Dynamically added courses will go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: รายละเอียดชำระ -->
+            <div class="card lg:col-span-1">
+                <h2 class="section-header">4.รายละเอียดชำระ</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="promotion" class="form-label">โปรโมชัน</label>
+                        <input type="text" id="promotion" class="form-field" placeholder="กรอกโปรโมชัน">
+                    </div>
+                    <div>
+                        <label for="discount" class="form-label">ส่วนลดพิเศษ</label>
+                        <input type="text" id="discount" class="form-field" placeholder="กรอกส่วนลด">
+                    </div>
+                    <div>
+                        <label for="payment-method" class="form-label">ชำระแบบ</label>
+                        <select id="payment-method" class="form-field">
+                            <option value="">เลือกวิธีชำระ</option>
+                            <option value="cash">เงินสด</option>
+                            <option value="transfer">โอน</option>
+                            <option value="credit">บัตรเครดิต</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="notes" class="form-label">หมายเหตุ</label>
+                        <textarea id="notes" rows="3" class="form-field" placeholder="เพิ่มหมายเหตุ"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: สรุปยอด -->
+            <div class="card lg:col-span-1">
+                <h2 class="section-header">5.สรุปยอด</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="total-amount" class="form-label">ยอดรวม</label>
+                        <input type="text" id="total-amount" class="form-field" readonly>
+                    </div>
+                    <div>
+                        <label for="fees" class="form-label">ค่าธรรมเนียม</label>
+                        <input type="text" id="fees" class="form-field" placeholder="กรอกค่าธรรมเนียม">
+                    </div>
+                    <div>
+                        <label for="net-amount" class="form-label">สุทธิ</label>
+                        <input type="text" id="net-amount" class="form-field" readonly>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Save button (placed outside the grid for full width control) -->
+            <div class="mt-8 col-span-full flex justify-center">
+                <button id="save-button" class="detail-action-button bg-blue-600 hover:bg-blue-700 w-full md:w-auto px-8 py-3 rounded-xl shadow-lg">
+                    <i class="fas fa-save mr-2"></i> บันทึก
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Message box for notifications -->
+    <div id="infoMessageBox" class="message-box"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // IMPORTANT: Replace with your deployed Google Apps Script Web App URL for COURSE DATA
+            const GOOGLE_SHEET_COURSE_WEB_APP_URL = 'YOUR_DEPLOYED_COURSE_DATA_WEB_APP_URL_HERE'; // Example: https://script.google.com/macros/s/AKfycbz_YOUR_COURSE_ID_HERE/exec';
+
+            // IMPORTANT: Replace with your deployed Google Apps Script Web App URL for STUDENT DETAILS and SALES RECORDS
+            // This URL will handle both student lookup/nickname update AND saving sales records.
+            const GOOGLE_SHEET_SALES_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzpiMi_AWfAatYujg1Def_ME5FGWjaBH762eOvAkGVKEvHgAe0OayN0sQeZ0sa1goKw/exec'; 
+
+            const studentIdCardInput = document.getElementById('student-id-card');
+            const studentCodeInput = document.getElementById('student-code'); 
+            const studentNameInput = document.getElementById('student-name');
+            const studentSurnameInput = document.getElementById('student-surname');
+            const studentNicknameInput = document.getElementById('student-nickname');
+
+            const studentStatusInput = document.getElementById('student-status');
+            const applicationTypeInput = document.getElementById('application-type');
+            const academicYearInput = document.getElementById('academic-year');
+            const branchInput = document.getElementById('branch');
+            const applicationDateInput = document.getElementById('application-date');
+            const programInput = document.getElementById('program');
+            const seasonInput = document.getElementById('Season'); // Corrected ID usage
+            const classInput = document.getElementById('class'); // Corrected ID usage
+
+            const promotionInput = document.getElementById('promotion');
+            const discountInput = document.getElementById('discount');
+            const paymentMethodInput = document.getElementById('payment-method');
+            const notesInput = document.getElementById('notes');
+
+            const courseSelect = document.getElementById('course-select');
+            const addCourseButton = document.getElementById('add-course-button');
+            const selectedCoursesTableBody = document.getElementById('selected-courses-table-body');
+            const totalAmountInput = document.getElementById('total-amount');
+            const feesInput = document.getElementById('fees');
+            const netAmountInput = document.getElementById('net-amount');
+            const saveButton = document.getElementById('save-button');
+            const infoMessageBox = document.getElementById('infoMessageBox');
+
+            let availableCourses = []; // Stores all fetched course data
+            let selectedCourses = []; // Stores courses currently added to the table
+            let originalNickname = ''; // To track if nickname was changed from database
+
+            // Utility function to display messages
+            function displayMessage(message, type = "info") {
+                infoMessageBox.textContent = message;
+                infoMessageBox.className = `message-box ${type}`; // Apply type class for styling
+                infoMessageBox.style.display = 'block';
+
+                setTimeout(() => {
+                    infoMessageBox.style.display = 'none';
+                }, 5000); // Hide after 5 seconds
+            }
+
+            // Function to fetch student details from Google Apps Script
+            async function fetchStudentDetails(searchType, searchValue) {
+                if (!searchValue) {
+                    studentCodeInput.value = '';
+                    studentNameInput.value = '';
+                    studentSurnameInput.value = '';
+                    studentNicknameInput.value = '';
+                    studentNicknameInput.readOnly = false; 
+                    originalNickname = '';
+                    return;
+                }
+
+                try {
+                    const url = new URL(GOOGLE_SHEET_SALES_WEB_APP_URL);
+                    if (searchType === 'idCard') {
+                        url.searchParams.append('idCard', searchValue);
+                    } else if (searchType === 'studentCode') {
+                        url.searchParams.append('studentCode', searchValue);
+                    }
+                    
+                    const response = await fetch(url.toString());
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json(); 
+
+                    if (data && (data['ชื่อจริง'] || data['รหัสนักเรียน'])) { 
+                        studentNameInput.value = data['ชื่อจริง'] || '';
+                        studentCodeInput.value = data['รหัสนักเรียน'] || ''; // Populate student code from search
+                        studentSurnameInput.value = data['นามสกุล'] || '';
+                        studentNicknameInput.value = data['ชื่อเล่น'] || '';
+                        originalNickname = data['ชื่อเล่น'] || ''; 
+                        studentNicknameInput.readOnly = false; 
+                        displayMessage('พบข้อมูลนักเรียนแล้ว!', 'success');
+                    } else {
+                        studentCodeInput.value = ''; // Clear student code if not found
+                        studentNameInput.value = '';
+                        studentSurnameInput.value = '';
+                        studentNicknameInput.value = '';
+                        originalNickname = '';
+                        studentNicknameInput.readOnly = false; 
+                        displayMessage('ไม่พบข้อมูลนักเรียน กรุณาป้อนข้อมูลด้วยตนเอง', 'info');
+                    }
+                } catch (error) {
+                    console.error('Error fetching student details:', error);
+                    displayMessage(`ไม่สามารถดึงข้อมูลนักเรียน: ${error.message}.`, 'error');
+                    studentNameInput.value = '';
+                    studentSurnameInput.value = '';
+                    studentNicknameInput.value = '';
+                    originalNickname = '';
+                    studentNicknameInput.readOnly = false; 
+                }
+            }
+
+            // Function to save/update student nickname
+            async function saveStudentNickname(idType, idValue, nickname) {
+                if (!idValue) {
+                    displayMessage('ไม่สามารถบันทึกชื่อเล่นได้: ต้องมี เลขประจำตัวประชาชน หรือ รหัสนักเรียน', 'error');
+                    return;
+                }
+                // Only send update if nickname has changed from original or was empty and now filled
+                if (originalNickname === nickname && nickname !== '') {
+                    // No change in nickname, or it was empty and still empty, no need to save to DB
+                    return;
+                }
+                
+                try {
+                    const payload = {
+                        action: 'updateNickname',
+                        nickname: nickname
+                    };
+                    if (idType === 'idCard') {
+                        payload.idCard = idValue;
+                    } else if (idType === 'studentCode') {
+                        payload.studentCode = idValue;
+                    }
+
+                    const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.success) {
+                        displayMessage('บันทึกชื่อเล่นสำเร็จ!', 'success');
+                        originalNickname = nickname; // Update original nickname after successful save
+                    } else {
+                        displayMessage(`บันทึกชื่อเล่นไม่สำเร็จ: ${result.error || 'Unknown error'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error saving nickname:', error);
+                    displayMessage(`ไม่สามารถบันทึกชื่อเล่นได้: ${error.message}.`, 'error');
+                }
+            }
+
+            // Event listener for เลขประจำตัวประชาชน input
+            let typingTimer; // Timer identifier
+            const doneTypingInterval = 500; // Time in ms (0.5 second)
+
+            studentIdCardInput.addEventListener('input', () => {
+                clearTimeout(typingTimer);
+                studentCodeInput.value = ''; // Clear other ID field
+                if (studentIdCardInput.value) {
+                    typingTimer = setTimeout(() => {
+                        fetchStudentDetails('idCard', studentIdCardInput.value);
+                    }, doneTypingInterval);
+                } else {
+                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
+                }
+            });
+
+            // Event listener for รหัสนักเรียน input
+            studentCodeInput.addEventListener('input', () => {
+                clearTimeout(typingTimer);
+                studentIdCardInput.value = ''; // Clear other ID field
+                if (studentCodeInput.value) {
+                    typingTimer = setTimeout(() => {
+                        fetchStudentDetails('studentCode', studentCodeInput.value);
+                    }, doneTypingInterval);
+                } else {
+                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
+                }
+            });
+
+
+            // Function to fetch course data from Google Apps Script
+            async function fetchCourseData() {
+                courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา...</option>';
+                courseSelect.disabled = true;
+                addCourseButton.disabled = true;
+
+                try {
+                    const response = await fetch(GOOGLE_SHEET_COURSE_WEB_APP_URL);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+
+                    if (data && data.length > 0) {
+                        // Assuming first row is headers: 'รหัสคอร์ส', 'ชื่อคอร์ส', 'ราคา', 'หน่วย'
+                        availableCourses = data.map(row => ({
+                            course_code: row['รหัสคอร์ส'],
+                            course_name: row['ชื่อคอร์ส'],
+                            price: parseFloat(row['ราคา']) || 0, // Ensure price is a number
+                            unit: row['หน่วย']
+                        }));
+                        populateCourseDropdown();
+                        displayMessage('โหลดข้อมูลวิชาสำเร็จ!', 'success');
+                    } else {
+                        availableCourses = [];
+                        courseSelect.innerHTML = '<option value="">ไม่พบข้อมูลวิชา</option>';
+                        displayMessage('ไม่พบข้อมูลวิชาใน Google Sheet.', 'info');
+                    }
+                } catch (error) {
+                    console.error('Error fetching course data:', error);
+                    courseSelect.innerHTML = '<option value="">ไม่สามารถโหลดวิชาได้</option>';
+                    displayMessage(`ไม่สามารถโหลดข้อมูลวิชา: ${error.message}. กรุณาตรวจสอบ URL Apps Script.`, 'error');
+                } finally {
+                    courseSelect.disabled = false;
+                    addCourseButton.disabled = false;
+                }
+            }
+
+            // Populate the course dropdown with fetched data
+            function populateCourseDropdown() {
+                courseSelect.innerHTML = '<option value="">--- เลือกวิชา ---</option>';
+                availableCourses.forEach(course => {
+                    const option = document.createElement('option');
+                    option.value = course.course_code;
+                    option.textContent = `${course.course_code} - ${course.course_name} (${course.price.toLocaleString()} ${course.unit})`;
+                    courseSelect.appendChild(option);
+                });
+            }
+
+            // Add selected course to the table
+            addCourseButton.addEventListener('click', () => {
+                const selectedCourseCode = courseSelect.value;
+                if (!selectedCourseCode) {
+                    displayMessage('กรุณาเลือกวิชาที่ต้องการเพิ่ม', 'info');
+                    return;
+                }
+
+                const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
+
+                if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+                    selectedCourses.push(courseToAdd);
+                    renderSelectedCourses();
+                    calculateTotals();
+                } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+                    displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
+                }
+            });
+
+            // Render selected courses in the table
+            function renderSelectedCourses() {
+                selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
+                if (selectedCourses.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
+                    selectedCoursesTableBody.appendChild(noDataRow);
+                    return;
+                }
+
+                selectedCourses.forEach(course => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${course.course_code}</td>
+                        <td>${course.course_name}</td>
+                        <td>${course.price.toLocaleString()}</td>
+                        <td>${course.unit}</td>
+                        <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
+                    `;
+                    selectedCoursesTableBody.appendChild(tr);
+                });
+            }
+
+            // Remove course from table
+            selectedCoursesTableBody.addEventListener('click', (event) => {
+                const removeButton = event.target.closest('.remove-course-button');
+                if (removeButton) {
+                    const courseCodeToRemove = removeButton.dataset.courseCode;
+                    selectedCourses = selectedCourses.filter(course => course.course_code !== courseCodeToRemove);
+                    renderSelectedCourses();
+                    calculateTotals();
+                }
+            });
+
+            // Basic calculation for total amount and net amount
+            function calculateTotals() {
+                let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
+                totalAmountInput.value = sum.toLocaleString(); // Format with commas
+
+                const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
+                netAmountInput.value = (sum - fees).toLocaleString();
+            }
+
+            // Call calculation on page load and when fees input changes
+            renderSelectedCourses(); // Initial render for empty state
+            calculateTotals();
+            feesInput.addEventListener('input', calculateTotals);
+
+            // Save button functionality
+            saveButton.addEventListener('click', async () => {
+                const idCard = studentIdCardInput.value.trim();
+                const studentCode = studentCodeInput.value.trim(); 
+                const currentNickname = studentNicknameInput.value.trim();
+
+                let idType = '';
+                let idValue = '';
+
+                if (idCard) {
+                    idType = 'idCard';
+                    idValue = idCard;
+                } else if (studentCode) {
+                    idType = 'studentCode';
+                    idValue = studentCode;
+                }
+
+                // 1. Save/Update Nickname
+                if (idValue && currentNickname !== originalNickname) {
+                    await saveStudentNickname(idType, idValue, currentNickname);
+                } else if (!idValue) {
+                    displayMessage('ไม่สามารถบันทึกชื่อเล่นได้: ต้องมี เลขประจำตัวประชาชน หรือ รหัสนักเรียน', 'error');
+                }
+
+                // 2. Gather all sales record data
+                const salesRecordData = {
+                    'เลขประจำตัวประชาชน': idCard,
+                    'รหัสนักเรียน': studentCode,
+                    'ชื่อจริง': studentNameInput.value.trim(),
+                    'นามสกุล': studentSurnameInput.value.trim(),
+                    'ชื่อเล่น': currentNickname,
+                    'สถานะนักเรียน': studentStatusInput.value,
+                    'รูปแบบการสมัคร': applicationTypeInput.value,
+                    'ปีการศึกษา': academicYearInput.value,
+                    'สาขา': branchInput.value,
+                    'วันที่สมัคร': applicationDateInput.value,
+                    'โปรแกรม': programInput.value,
+                    'ซีซั่น': seasonInput.value,
+                    'ระดับ': classInput.value, // This is 'ระดับ' in Thai, corresponding to 'class' ID
+                    'วิชาที่สมัคร': JSON.stringify(selectedCourses), // Store courses as JSON string
+                    'โปรโมชัน': promotionInput.value.trim(),
+                    'ส่วนลดพิเศษ': discountInput.value.trim(),
+                    'ชำระแบบ': paymentMethodInput.value,
+                    'หมายเหตุ': notesInput.value.trim(),
+                    'ยอดรวม': totalAmountInput.value.trim(),
+                    'ค่าธรรมเนียม': feesInput.value.trim(),
+                    'สุทธิ': netAmountInput.value.trim()
+                };
+
+                // 3. Send all sales record data to Apps Script
+                try {
+                    const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'saveSalesRecord', // New action for saving sales data
+                            data: salesRecordData
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const result = await response.json();
+                    if (result.success) {
+                        displayMessage('บันทึกข้อมูลการขายสำเร็จ!', 'success');
+                        // Optionally, clear the form or reset state after successful save
+                    } else {
+                        displayMessage(`บันทึกข้อมูลการขายไม่สำเร็จ: ${result.error || 'Unknown error'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error saving sales record:', error);
+                    displayMessage(`ไม่สามารถบันทึกข้อมูลการขายได้: ${error.message}.`, 'error');
+                }
+            });
+
+            // Initial fetches
+            fetchCourseData(); // Fetch course data on load
+        });
+    </script>
+</body>
+</html>
