@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Administrator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* New grid for the main zone cards */
+        .main-zones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Adjust min-width as needed */
+            gap: 1.5rem; /* Gap between the main zone cards */
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            padding: 1rem; /* Reduced padding for smaller boxes */
+            margin-bottom: 0; /* Remove default margin as grid handles spacing */
+            display: flex; /* Use flex to align content within the card */
+            flex-direction: column; /* Stack content vertically */
+            min-height: 250px; /* Ensure a consistent minimum height for the zone cards */
+        }
+        .section-header {
+            font-size: 1.25rem; /* text-xl, smaller for box title */
+            font-weight: 700; /* font-bold */
+            color: #1f2937; /* gray-900 */
+            margin-bottom: 0.75rem; /* Reduced margin */
+            border-bottom: 2px solid #F89D2F; /* Orange accent line */
+            padding-bottom: 0.5rem;
+        }
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem; /* Reduced padding for list items */
+            border-bottom: 1px solid #e5e7eb; /* Light gray border */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .list-item:hover {
+            background-color: #f9fafb; /* Lighter background on hover */
+        }
+        .list-item:last-child {
+            border-bottom: none; /* No border on the last item */
+        }
+        .list-item-icon {
+            color: #F89D2F; /* Orange icon */
+            margin-right: 0.75rem; /* Reduced margin */
+            font-size: 1rem; /* Slightly smaller icon */
+        }
+        .list-item-text {
+            flex-grow: 1;
+            font-size: 0.9rem; /* Slightly smaller text */
+            color: #374151; /* gray-700 */
+        }
+        .list-item-arrow {
+            color: #9ca3af; /* gray-400 */
+            font-size: 0.8rem; /* Smaller arrow */
+        }
+        .card p.text-gray-700 { /* Adjust description text in the card */
+            font-size: 0.9rem;
+            margin-bottom: 1rem; /* Adjust margin */
+        }
+
+        /* Detail Content Area Styles */
+        .detail-content-area {
+            display: none; /* Hidden by default */
+            margin-top: 2rem;
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+        }
+        .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .detail-header h2 {
+            font-size: 1.75rem; /* text-2xl */
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .detail-header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .detail-action-button {
+            background-color: #F89D2F; /* Orange */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .detail-action-button:hover {
+            background-color: #D28528; /* Darker orange */
+        }
+        .detail-action-button.outline {
+            background-color: transparent;
+            color: #F89D2F;
+            border: 1px solid #F89D2F;
+        }
+        .detail-action-button.outline:hover {
+            background-color: #ffe7d6; /* Light orange */
+        }
+
+        /* Filter bar within detail view */
+        .detail-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .detail-search-input {
+            flex-grow: 1;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            min-width: 200px;
+        }
+        .detail-date-range {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+        .detail-filter-button {
+            background-color: #e5e7eb;
+            color: #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .detail-filter-button:hover {
+            background-color: #d1d5db;
+        }
+
+        /* Table Styles */
+        .data-table-container {
+            overflow-x: auto; /* Enable horizontal scrolling for tables on small screens */
+            border: 1px solid #e5e7eb;
+            border-radius: 0.75rem;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        .data-table thead {
+            background-color: #f9fafb; /* Light gray header */
+        }
+        .data-table th, .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap; /* Prevent wrapping in table cells */
+        }
+        .data-table th {
+            color: #6b7280; /* gray-500 */
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer; /* Indicate sortable */
+            position: relative; /* For sort indicator positioning */
+        }
+        .data-table th:hover {
+            background-color: #e5e7eb; /* Hover effect for sortable headers */
+        }
+        .data-table th .sort-icon {
+            margin-left: 0.5rem;
+            font-size: 0.8em; /* Smaller icon */
+            color: #9ca3af; /* Default gray for inactive sort icons */
+        }
+        .data-table th.sorted .sort-icon {
+            color: #F89D2F; /* Orange for active sort icon */
+        }
+        .data-table td {
+            color: #374151; /* gray-700 */
+        }
+        .data-table tr:hover {
+            background-color: #f3f4f6; /* Even lighter background on row hover */
+        }
+        .data-table-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            object-fit: cover;
+            margin-right: 0.75rem;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        .data-table-tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.25rem;
+        }
+        .tag-green { background-color: #d1fae5; color: #065f46; }
+        .tag-blue { background-color: #dbeafe; color: #1e40af; }
+        .tag-purple { background-color: #e9d5ff; color: #6b21a8; }
+        .data-table-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem 0;
+            border-top: 1px solid #e5e7eb;
+            margin-top: 1rem;
+
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: #f9fafb;
+            max-width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .pagination-button {
+            background-color: transparent;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            color: #4b5563;
+            font-weight: 500;
+            border-right: 1px solid #d1d5db;
+        }
+        .pagination-button:last-child {
+            border-right: none;
+        }
+        .pagination-button:hover:not(:disabled) {
+            background-color: #e5e7eb;
+        }
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination-numbers {
+            display: flex;
+            flex-grow: 1;
+        }
+        .pagination-number {
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            color: #4b5563;
+            border-right: 1px solid #d1d5db;
+            font-weight: 500;
+        }
+        .pagination-number:last-child {
+            border-right: none;
+        }
+        .pagination-number.active {
+            background-color: #F89D2F;
+            color: white;
+        }
+        .pagination-number:hover:not(.active) {
+            background-color: #e5e7eb;
+        }
+        /* Loading spinner styles */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, .3);
+            border-radius: 50%;
+            border-top-color: #F89D2F;
+            animation: spin 1s ease-in-out infinite;
+            -webkit-animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+        }
+        @keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+        @-webkit-keyframes spin {
+            to { -webkit-transform: rotate(360deg); }
+        }
+        .rows-per-page-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+        .rows-per-page-selector select {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: white;
+            cursor: pointer;
+        }
+        /* No specific column widths for the reverted state */
+    </style>
+</head>
+<body class="p-8">
+
+    <div class="container mx-auto">
+        <div class="mb-6">
+            <a href=" erp-dashboard.html" class="detail-action-button outline">
+                <i class="fas fa-arrow-left"></i> Back to ERP Dashboard
+            </a>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Sales Administrator</h1>
+
+        <div id="main-zones-view" class="main-zones-grid">
+            <div class="card">
+                <h2 class="section-header">Onsite</h2>
+                <p class="text-gray-700 mb-4">Manage sales activities conducted at physical locations.</p>
+                <ul class="space-y-1">
+                    <li class="list-item" data-detail-id="student-database">
+                        <i class="fas fa-database list-item-icon"></i>
+                        <span class="list-item-text">Student Database</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="teacher-hours">
+                        <i class="fas fa-chalkboard-teacher list-item-icon"></i>
+                        <span class="list-item-text">Total Teacher Hours</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="sales-records">
+                        <i class="fas fa-shopping-cart list-item-icon"></i>
+                        <span class="list-item-text">Sales Records</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    
+                    
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2 class="section-header">Online</h2>
+                <p class="text-gray-700 mb-4">Oversee e-commerce transactions and digital campaigns.</p>
+                <ul class="space-y-1">
+                    <li class="list-item" data-detail-id="website-analytics">
+                        <i class="fas fa-chart-line list-item-icon"></i>
+                        <span class="list-item-text">Website Analytics</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="email-marketing">
+                        <i class="fas fa-envelope-open-text list-item-icon"></i>
+                        <span class="list-item-text">Email Marketing Campaigns</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="social-media">
+                        <i class="fas fa-share-alt list-item-icon"></i>
+                        <span class="list-item-text">Social Media Performance</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="online-orders">
+                        <i class="fas fa-box-open list-item-icon"></i>
+                        <span class="list-item-text">Online Order Management</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="paid-ads">
+                        <i class="fas fa-ad list-item-icon"></i>
+                        <span class="list-item-text">Paid Advertising Reports</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2 class="section-header">Road Show</h2>
+                <p class="text-gray-700 mb-4">Track sales and lead generation from promotional events.</p>
+                <ul class="space-y-1">
+                    <li class="list-item" data-detail-id="event-schedule">
+                        <i class="fas fa-map-marked-alt list-item-icon"></i>
+                        <span class="list-item-text">Event Schedule</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="promotion-details">
+                        <i class="fas fa-bullhorn list-item-icon"></i>
+                        <span class="list-item-text">Promotion Details</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="lead-forms">
+                        <i class="fas fa-ticket-alt list-item-icon"></i>
+                        <span class="list-item-text">Lead Capture Forms</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="onsite-sales-data">
+                        <i class="fas fa-dollar-sign list-item-icon"></i>
+                        <span class="list-item-text">On-site Sales Data</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                    <li class="list-item" data-detail-id="road-show-performance">
+                        <i class="fas fa-chart-bar list-item-icon"></i>
+                        <span class="list-item-text">Road Show Performance</span>
+                        <i class="fas fa-chevron-right list-item-arrow"></i>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="detail-content-area" class="detail-content-area">
+            <div class="detail-header">
+                <button id="back-to-zones" class="detail-action-button outline">
+                    <i class="fas fa-arrow-left"></i> Back to Zones
+                </button>
+                <h2 id="detail-page-title"></h2>
+                <div id="detail-header-right" class="detail-header-actions">
+                    </div>
+            </div>
+
+            <div id="dynamic-detail-section">
+                </div>
+        </div>
+    </div>
+
+    <script type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainZonesView = document.getElementById('main-zones-view');
+            const detailContentArea = document.getElementById('detail-content-area');
+            const detailPageTitle = document.getElementById('detail-page-title');
+            const dynamicDetailSection = document.getElementById('dynamic-detail-section');
+            const backToZonesBtn = document.getElementById('back-to-zones');
+            const listItems = document.querySelectorAll('.list-item');
+
+            // Function to generate generic placeholder content for sections other than Student Database
+            const generatePlaceholderContent = (title) => {
+                detailPageTitle.textContent = title;
+                // Since this is generic, we can add a simple button or nothing
+                const detailHeaderRight = document.getElementById('detail-header-right');
+                if (detailHeaderRight) {
+                    detailHeaderRight.innerHTML = `
+                        <button class="detail-action-button">
+                            <i class="fas fa-info-circle"></i> More Info
+                        </button>
+                    `;
+                }
+                
+                dynamicDetailSection.innerHTML = `
+                    <div class="placeholder-content flex-grow items-center justify-center">
+                        <h3 class="text-xl font-semibold mb-4">Content for "${title}" is coming soon!</h3>
+                        <p class="text-gray-600">This section will display detailed information and functionality related to ${title}.</p>
+                    </div>
+                `;
+            };
+
+            // Event listeners for main list items (Onsite, Online, Road Show)
+            listItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    mainZonesView.style.display = 'none'; // Hide the main zone cards
+                    detailContentArea.style.display = 'block'; // Show the detail area
+
+                    const detailId = item.dataset.detailId;
+
+                    // Load content based on the clicked item's ID
+                    if (detailId === 'student-database') {
+                        // Redirect to the new student database page
+                        window.location.href = 'student-database-view.html';
+                    } else {
+                        // For any other item, show generic placeholder
+                        generatePlaceholderContent(item.querySelector('.list-item-text').textContent);
+                    }
+                });
+            });
+
+            // Event listener for the "Back to Zones" button
+            backToZonesBtn.addEventListener('click', () => {
+                detailContentArea.style.display = 'none'; // Hide the detail area
+                mainZonesView.style.display = 'grid'; // Show the main zone cards
+                // Reset states when returning to main view - no need for student data specific resets here
+            });
+        });
+    </script>
+</body>
+</html>
