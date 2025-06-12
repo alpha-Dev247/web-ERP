@@ -489,36 +489,35 @@
             }
 
             // Function to save/update student nickname
-            async function saveNickname() {
-                const idCard = document.getElementById('idCard').value.trim();
-                const nickname = document.getElementById('nickname').value.trim();
-
-                if (!nickname) {
-                     alert("กรุณากรอกชื่อเล่นก่อนบันทึก");
+            async function saveStudentNickname(idType, idValue, nickname) {
+                if (!idValue) {
+                    displayMessage('ไม่สามารถบันทึกชื่อเล่นได้: ต้องมี เลขประจำตัวประชาชน หรือ รหัสนักเรียน', 'error');
                     return;
                 }
-
+                // Only send update if nickname has changed from original or was empty and now filled
+                if (originalNickname === nickname && nickname !== '') {
+                    // No change in nickname, or it was empty and still empty, no need to save to DB
+                    return;
+                }
                 
                 try {
-                    const googleAppsScriptUrl = GOOGLE_SHEET_SALES_WEB_APP_URL ;
+                    const payload = {
+                        action: 'updateNickname',
+                        nickname: nickname
+                    };
+                    if (idType === 'idCard') {
+                        payload.idCard = idValue;
+                    } else if (idType === 'studentCode') {
+                        payload.studentCode = idValue;
+                    }
 
-                    async function saveFormData() {
-                    const nickname = document.getElementById("nickname").value;
-                    
-
-                    const urlEncodedData = new URLSearchParams();
-                    urlEncodedData.append("nickname", nickname);
-                   
-    try {
-        await fetch(googleAppsScriptUrl, {
-            method: 'POST',
-            mode: 'no-cors', // CORS-safe, but cannot read response
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: urlEncodedData
+                    const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
                     });
-                    
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
@@ -700,7 +699,7 @@
 
                 // 1. Save/Update Nickname
                 if (idValue && currentNickname !== originalNickname) {
-                    await saveNickname(idType, idValue, currentNickname);
+                    await saveStudentNickname(idType, idValue, currentNickname);
                 } else if (!idValue) {
                     displayMessage('ไม่สามารถบันทึกชื่อเล่นได้: ต้องมี เลขประจำตัวประชาชน หรือ รหัสนักเรียน', 'error');
                 }
@@ -731,10 +730,9 @@
                 };
 
                 // 3. Send all sales record data to Apps Script
-                try {
+                try { 
                     const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
                         method: 'POST',
-                        mode: 'no-cors', // CORS-safe, but cannot read response
                         headers: {
                             'Content-Type': 'application/json',
                         },
