@@ -186,23 +186,23 @@
                 <div class="space-y-4">
                     <div>
                         <label for="student-id-card" class="form-label">เลขประจำตัวประชาชน</label>
-                        <input type="text" id="student-id-card" class="form-field" placeholder="กรอกเลขประจำตัวประชาชน">
+                        <input type="text" id="idCard" class="form-field" placeholder="กรอกเลขประจำตัวประชาชน">
                     </div>
                     <div>
                         <label for="student-code" class="form-label">รหัสนักเรียน</label>
-                        <input type="text" id="student-code" class="form-field" placeholder="">
+                        <input type="text" id="studentCode" class="form-field" placeholder="">
                     </div>
                     <div>
                         <label for="student-name" class="form-label">ชื่อจริง</label>
-                        <input type="text" id="student-name" class="form-field" placeholder="" readonly>
+                        <input type="text" id="firstName" class="form-field" placeholder="" readonly>
                     </div>
                     <div>
                         <label for="student-surname" class="form-label">นามสกุล</label>
-                        <input type="text" id="student-surname" class="form-field" placeholder="" readonly>
+                        <input type="text" id="lastName" class="form-field" placeholder="" readonly>
                     </div>
                     <div>
                         <label for="student-nickname" class="form-label">ชื่อเล่น</label>
-                        <input type="text" id="student-nickname" class="form-field" placeholder="กรอกชื่อเล่นกรณีไม่อยู่ในฐานข้อมูล">
+                        <input type="text" id="nickname" class="form-field" placeholder="กรอกชื่อเล่นกรณีไม่อยู่ในฐานข้อมูล">
                     </div>
                 </div>
             </div>
@@ -390,11 +390,11 @@
             // This URL will handle both student lookup/nickname update AND saving sales records.
             const GOOGLE_SHEET_SALES_WEB_APP_URL = 'YOUR_DEPLOYED_SALES_WEB_APP_URL_HERE'; 
 
-            const studentIdCardInput = document.getElementById('student-id-card');
-            const studentCodeInput = document.getElementById('student-code'); 
-            const studentNameInput = document.getElementById('student-name');
-            const studentSurnameInput = document.getElementById('student-surname');
-            const studentNicknameInput = document.getElementById('student-nickname');
+            const studentIdCardInput = document.getElementById('idCard');
+            const studentCodeInput = document.getElementById('studentCode'); 
+            const studentNameInput = document.getElementById('firstName');
+            const studentSurnameInput = document.getElementById('lastName');
+            const studentNicknameInput = document.getElementById('nickname');
 
             const studentStatusInput = document.getElementById('student-status');
             const applicationTypeInput = document.getElementById('application-type');
@@ -513,6 +513,7 @@
 
                     const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
                         method: 'POST',
+                        mode: "no-cors",
                         headers: {
                             'Content-Type': 'application/json',
                         },
@@ -706,33 +707,45 @@
 
                 // 2. Gather all sales record data
                 const salesRecordData = {
-                    'เลขประจำตัวประชาชน': idCard,
-                    'รหัสนักเรียน': studentCode,
-                    'ชื่อจริง': studentNameInput.value.trim(),
-                    'นามสกุล': studentSurnameInput.value.trim(),
-                    'ชื่อเล่น': currentNickname,
-                    'สถานะนักเรียน': studentStatusInput.value,
-                    'รูปแบบการสมัคร': applicationTypeInput.value,
-                    'ปีการศึกษา': academicYearInput.value,
-                    'สาขา': branchInput.value,
-                    'วันที่สมัคร': applicationDateInput.value,
-                    'โปรแกรม': programInput.value,
-                    'ซีซั่น': seasonInput.value,
-                    'ระดับ': classInput.value, // This is 'ระดับ' in Thai, corresponding to 'class' ID
-                    'วิชาที่สมัคร': JSON.stringify(selectedCourses), // Store courses as JSON string
-                    'โปรโมชัน': promotionInput.value.trim(),
-                    'ส่วนลดพิเศษ': discountInput.value.trim(),
-                    'ชำระแบบ': paymentMethodInput.value,
-                    'หมายเหตุ': notesInput.value.trim(),
-                    'ยอดรวม': totalAmountInput.value.trim(),
-                    'ค่าธรรมเนียม': feesInput.value.trim(),
-                    'สุทธิ': netAmountInput.value.trim()
+                    "เลขประจำตัวประชาชน": document.getElementById("idCard").value.trim(),
+                    "รหัสนักเรียน": document.getElementById("studentCode").value.trim(),
+                    "ชื่อจริง": document.getElementById("firstName").value.trim(),
+                    "นามสกุล": document.getElementById("lastName").value.trim(),
+                    "ชื่อเล่น": document.getElementById("nickname").value.trim(),
+                    "โรงเรียน": document.getElementById("school").value.trim(),
+                    "Email": document.getElementById("email").value.trim(),
+                    "ที่อยู่": document.getElementById("address").value.trim(),
+
+                    "สถานะนักเรียน": document.getElementById("studentStatus").value.trim(),
+                    "รูปแบบการสมัคร": document.getElementById("applicationType").value.trim(),
+                    "ปีการศึกษา": document.getElementById("academicYear").value.trim(),
+                    "สาขา": document.getElementById("branch").value.trim(),
+                    "วันที่สมัคร": document.getElementById("applicationDate").value.trim(),
+                    "โปรแกรม": document.getElementById("program").value.trim(),
+                    "ซีซั่น": document.getElementById("season").value.trim(),
+                    "ระดับ": document.getElementById("classLevel").value.trim(),
+                    "โปรโมชัน": document.getElementById("promotion").value.trim(),
+                    "ส่วนลดพิเศษ": document.getElementById("discount").value.trim(),
+                    "ชำระแบบ": document.getElementById("paymentMethod").value.trim(),
+                    "หมายเหตุ": document.getElementById("notes").value.trim(),
+                    "ยอดรวม": document.getElementById("totalAmount").value.trim(),
+                    "ค่าธรรมเนียม": document.getElementById("fees").value.trim(),
+                    "สุทธิ": document.getElementById("netAmount").value.trim()
                 };
 
+                
+                // Remove empty fields
+                const filteredData = {};
+                for (const key in data) {
+                     if (data[key]) {
+                     filteredData[key] = data[key];
+                    }
+                }
                 // 3. Send all sales record data to Apps Script
                 try {
                     const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
                         method: 'POST',
+                        mode: "no-cors",
                         headers: {
                             'Content-Type': 'application/json',
                         },
