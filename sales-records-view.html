@@ -48,31 +48,35 @@
   <h1 class="text-2xl font-bold mb-6">📋 ฟอร์มบันทึกข้อมูลนักเรียน + ข้อมูลการขาย</h1>
 
   <div class="form-section">
-    <h2 class="text-xl font-semibold mb-4">ข้อมูลนักเรียน</h2>
-    <label>เลขประจำตัวประชาชน</label>
-    <input type="text" id="idCard">
+  <h2 class="text-xl font-semibold mb-4">ข้อมูลนักเรียน</h2>
 
-    <label>รหัสนักเรียน</label>
-    <input type="text" id="studentCode">
-
-    <label>ชื่อจริง</label>
-    <input type="text" id="firstName">
-
-    <label>นามสกุล</label>
-    <input type="text" id="lastName">
-
-    <label>ชื่อเล่น</label>
-    <input type="text" id="nickname">
-
-    <label>โรงเรียน</label>
-    <input type="text" id="school">
-
-    <label>Email</label>
-    <input type="email" id="email">
-
-    <label>ที่อยู่</label>
-    <input type="text" id="address">
+  <label>เลขประจำตัวประชาชน</label>
+  <div class="flex gap-2">
+    <input type="text" id="idCard" class="flex-1" />
+    <button type="button" onclick="searchStudent()">🔍 ค้นหา</button>
   </div>
+
+  <label>รหัสนักเรียน</label>
+  <input type="text" id="studentCode" readonly />
+
+  <label>ชื่อจริง</label>
+  <input type="text" id="firstName" readonly />
+
+  <label>นามสกุล</label>
+  <input type="text" id="lastName" readonly />
+
+  <label>ชื่อเล่น</label>
+  <input type="text" id="nickname" placeholder="กรอกชื่อเล่นถ้ายังไม่มี" />
+
+  <label>โรงเรียน</label>
+  <input type="text" id="school" />
+
+  <label>Email</label>
+  <input type="email" id="email" />
+
+  <label>ที่อยู่</label>
+  <input type="text" id="address" />
+</div>
 
   <div class="form-section">
     <h2 class="text-xl font-semibold mb-4">ข้อมูลการขาย</h2>
@@ -131,70 +135,50 @@
   <div id="msgBox" class="message"></div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/PASTE_YOUR_DEPLOYED_URL_HERE/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxWy8oZXoHDLLIFmihUq3PeowAMzUCmD4hGSdvFJJJJBc_jLnZjQrHc0RCSWe64tKZj/exec";
 
-    async function submitForm() {
-      const msgBox = document.getElementById("msgBox");
+  async function searchStudent() {
+    const idCard = document.getElementById("idCard").value.trim();
+    const msgBox = document.getElementById("msgBox");
 
-      const data = {
-        "เลขประจำตัวประชาชน": document.getElementById("idCard").value.trim(),
-        "รหัสนักเรียน": document.getElementById("studentCode").value.trim(),
-        "ชื่อจริง": document.getElementById("firstName").value.trim(),
-        "นามสกุล": document.getElementById("lastName").value.trim(),
-        "ชื่อเล่น": document.getElementById("nickname").value.trim(),
-        "โรงเรียน": document.getElementById("school").value.trim(),
-        "Email": document.getElementById("email").value.trim(),
-        "ที่อยู่": document.getElementById("address").value.trim(),
-
-        "สถานะนักเรียน": document.getElementById("studentStatus").value.trim(),
-        "รูปแบบการสมัคร": document.getElementById("applicationType").value.trim(),
-        "ปีการศึกษา": document.getElementById("academicYear").value.trim(),
-        "สาขา": document.getElementById("branch").value.trim(),
-        "วันที่สมัคร": document.getElementById("applicationDate").value.trim(),
-        "โปรแกรม": document.getElementById("program").value.trim(),
-        "ซีซั่น": document.getElementById("season").value.trim(),
-        "ระดับ": document.getElementById("classLevel").value.trim(),
-        "โปรโมชัน": document.getElementById("promotion").value.trim(),
-        "ส่วนลดพิเศษ": document.getElementById("discount").value.trim(),
-        "ชำระแบบ": document.getElementById("paymentMethod").value.trim(),
-        "หมายเหตุ": document.getElementById("notes").value.trim(),
-        "ยอดรวม": document.getElementById("totalAmount").value.trim(),
-        "ค่าธรรมเนียม": document.getElementById("fees").value.trim(),
-        "สุทธิ": document.getElementById("netAmount").value.trim()
-      };
-
-      // Remove empty fields
-      const filteredData = {};
-      for (const key in data) {
-        if (data[key]) {
-          filteredData[key] = data[key];
-        }
-      }
-
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ data: filteredData })
-        });
-
-        const result = await response.json();
-        if (result.success) {
-          msgBox.textContent = "✅ บันทึกข้อมูลเรียบร้อย!";
-          msgBox.style.color = "green";
-        } else {
-          msgBox.textContent = "❌ บันทึกไม่สำเร็จ: " + result.error;
-          msgBox.style.color = "red";
-        }
-      } catch (err) {
-        msgBox.textContent = "❌ เกิดข้อผิดพลาด: " + err.message;
-        msgBox.style.color = "red";
-        console.error(err);
-      }
+    if (!idCard) {
+      msgBox.textContent = "❗ กรุณากรอกเลขบัตรประชาชนก่อนค้นหา";
+      msgBox.style.color = "orange";
+      return;
     }
-  </script>
+
+    try {
+      const res = await fetch(`${API_URL}?idCard=${idCard}`);
+      const data = await res.json();
+
+      if (!data || data.error || !data["รหัสนักเรียน"]) {
+        msgBox.textContent = "❌ ไม่พบนักเรียนในระบบ";
+        msgBox.style.color = "red";
+        clearStudentFields();
+        return;
+      }
+
+      document.getElementById("studentCode").value = data["รหัสนักเรียน"];
+      document.getElementById("firstName").value = data["ชื่อจริง"];
+      document.getElementById("lastName").value = data["นามสกุล"];
+      document.getElementById("nickname").value = data["ชื่อเล่น"] || "";
+      msgBox.textContent = "✅ พบข้อมูลนักเรียน";
+      msgBox.style.color = "green";
+
+    } catch (err) {
+      console.error(err);
+      msgBox.textContent = "❌ เกิดข้อผิดพลาดในการเชื่อมต่อ";
+      msgBox.style.color = "red";
+    }
+  }
+
+  function clearStudentFields() {
+    document.getElementById("studentCode").value = "";
+    document.getElementById("firstName").value = "";
+    document.getElementById("lastName").value = "";
+    document.getElementById("nickname").value = "";
+  }
+</script>
+
 </body>
 </html>
