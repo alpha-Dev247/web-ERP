@@ -718,16 +718,12 @@
                          },
 
 
-                        body: URLSearchParams({
-                            action: 'saveSalesRecord', // New action for saving sales data
-                            data: salesRecordData
-                        })
+                        body: new URLSearchParams({
+                        action: 'saveSalesRecord',
+                        data: JSON.stringify(salesRecordData)       
+                    })
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const result = await response.json();
                     if (result.success) {
                         displayMessage('บันทึกข้อมูลการขายสำเร็จ!', 'success');
                         // Optionally, clear the form or reset state after successful save
