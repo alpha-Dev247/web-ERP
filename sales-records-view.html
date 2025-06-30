@@ -468,36 +468,32 @@
 }
 
             // Function to save/update student nickname
-          async function saveStudentNickname() {
-  const idCard = studentIdCardInput.value.trim();
-  const nickname = studentNicknameInput.value.trim();
-
-  if (!idCard || !nickname) {
-    displayMessage('กรุณากรอกเลขบัตรและชื่อเล่นให้ครบ', 'error');
+   async function saveStudentNickname(idType, idValue, nickname) {
+  if (!idValue || !nickname) {
+    displayMessage('กรุณากรอกเลขบัตรหรือรหัส และชื่อเล่นให้ครบ', 'error');
     return;
   }
 
   try {
     const formData = new URLSearchParams();
-    formData.append('idCard', idCard);
+    formData.append(idType, idValue);
     formData.append('nickname', nickname);
     formData.append('action', 'updateNickname');
 
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: formData.toString()
+    const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers:{
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+    body: new URLSearchParams({
+    idCard: idValue,
+    nickname: nickname,
+    action: 'updateNickname'
+    }).toString()
     });
 
-    const result = await response.json();
-
-    if (result.success) {
-      displayMessage('✅ บันทึกชื่อเล่นเรียบร้อย', 'success');
-    } else {
-      displayMessage('❌ บันทึกไม่สำเร็จ: ' + result.error, 'error');
-    }
+  
   } catch (error) {
     console.error(error);
     displayMessage('❌ เกิดข้อผิดพลาดในการส่งข้อมูล', 'error');
@@ -714,7 +710,7 @@
                 }
                 // 3. Send all sales record data to Apps Script
                 try {
-                   fetch(API_URL, {
+                   fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
                                 method: 'POST',
                                 mode: 'no-cors',
                 headers: {
@@ -722,7 +718,7 @@
                          },
 
 
-                        body: JSON.stringify({
+                        body: URLSearchParams({
                             action: 'saveSalesRecord', // New action for saving sales data
                             data: salesRecordData
                         })
