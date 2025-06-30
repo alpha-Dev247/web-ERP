@@ -384,377 +384,62 @@
     <!-- Message box for notifications -->
     <div id="infoMessageBox" class="message-box"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const GOOGLE_SHEET_SALES_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxxye9xSFXDNQNg4Nj_JD5fe03tgjoQ_PFzguvzfbVASFcNQdr0HERbbCr0gPq2HoX3/exec';
+<script>
+  const API_URL = 'https://script.google.com/macros/s/AKfycbxWtZcyQIUQNxexbxEYSrjjEb955nnhtuRiuWJ9MRb5RyH6lu_SDhddI7tiOJ2IXYGN/exec';
 
-            // IMPORTANT: Replace with your deployed Google Apps Script Web App URL for COURSE DATA
-            const GOOGLE_SHEET_COURSE_WEB_APP_URL = 'YOUR_DEPLOYED_COURSE_DATA_WEB_APP_URL_HERE'; // Example: https://script.google.com/macros/s/AKfycbz_YOUR_COURSE_ID_HERE/exec';
+  async function fetchStudentDetails() {
+    const idCard = document.getElementById('idCard').value.trim();
+    if (!idCard) return alert("กรุณากรอกเลขบัตรประชาชน");
 
-            
+    try {
+      const response = await fetch(`${API_URL}?idCard=${idCard}`);
+      const data = await response.json();
 
-            const studentIdCardInput = document.getElementById('idCard');
-            const studentCodeInput = document.getElementById('studentCode'); 
-            const studentNameInput = document.getElementById('firstName');
-            const studentSurnameInput = document.getElementById('lastName');
-            const studentNicknameInput = document.getElementById('nickname');
+      if (!data || data.error) {
+        alert("ไม่พบนักเรียนในระบบ");
+        return;
+      }
 
-            const studentStatusInput = document.getElementById('student-status');
-            const applicationTypeInput = document.getElementById('application-type');
-            const academicYearInput = document.getElementById('academic-year');
-            const branchInput = document.getElementById('branch');
-            const applicationDateInput = document.getElementById('application-date');
-            const programInput = document.getElementById('program');
-            const seasonInput = document.getElementById('Season'); // Corrected ID usage
-            const classInput = document.getElementById('class'); // Corrected ID usage
+      document.getElementById('studentCode').value = data['รหัสนักเรียน'];
+      document.getElementById('firstName').value = data['ชื่อจริง'];
+      document.getElementById('lastName').value = data['นามสกุล'];
+      document.getElementById('nickname').value = data['ชื่อเล่น'] || '';
 
-            const promotionInput = document.getElementById('promotion');
-            const discountInput = document.getElementById('discount');
-            const paymentMethodInput = document.getElementById('payment-method');
-            const notesInput = document.getElementById('notes');
-
-            const courseSelect = document.getElementById('course-select');
-            const addCourseButton = document.getElementById('add-course-button');
-            const selectedCoursesTableBody = document.getElementById('selected-courses-table-body');
-            const totalAmountInput = document.getElementById('total-amount');
-            const feesInput = document.getElementById('fees');
-            const netAmountInput = document.getElementById('net-amount');
-            const saveButton = document.getElementById('save-button');
-            const infoMessageBox = document.getElementById('infoMessageBox');
-
-            let availableCourses = []; // Stores all fetched course data
-            let selectedCourses = []; // Stores courses currently added to the table
-            let originalNickname = ''; // To track if nickname was changed from database
-
-            // Utility function to display messages
-            function displayMessage(message, type = "info") {
-                infoMessageBox.textContent = message;
-                infoMessageBox.className = `message-box ${type}`; // Apply type class for styling
-                infoMessageBox.style.display = 'block';
-
-                setTimeout(() => {
-                    infoMessageBox.style.display = 'none';
-                }, 5000); // Hide after 5 seconds
-            }
-
-            // Function to fetch student details from Google Apps Script
-       async function fetchStudentDetails(searchType, searchValue) {
-  try {
-    const url = new URL(GOOGLE_SHEET_SALES_WEB_APP_URL);
-    url.searchParams.append(searchType, searchValue);
-    const response = await fetch(url.toString());
-    const data = await response.json();
-
-    if (data && data['ชื่อจริง']) {
-      studentNameInput.value = data['ชื่อจริง'] || '';
-      studentCodeInput.value = data['รหัสนักเรียน'] || '';
-      studentSurnameInput.value = data['นามสกุล'] || '';
-      studentNicknameInput.value = data['ชื่อเล่น'] || '';
-      originalNickname = data['ชื่อเล่น'] || '';
-      studentNicknameInput.readOnly = false;
-      displayMessage('พบข้อมูลนักเรียนแล้ว!', 'success');
-    } else {
-      studentCodeInput.value = '';
-      studentNameInput.value = '';
-      studentSurnameInput.value = '';
-      studentNicknameInput.value = '';
-      studentNicknameInput.readOnly = false;
-      displayMessage('ไม่พบข้อมูลนักเรียน กรุณาป้อนข้อมูลด้วยตนเอง', 'info');
+    } catch (err) {
+      console.error("Fetch error:", err);
+      alert("❌ ไม่สามารถเชื่อมต่อข้อมูลนักเรียนได้");
     }
-  } catch (error) {
-    console.error('Error fetching student details:', error);
-    displayMessage(`ไม่สามารถดึงข้อมูลนักเรียน: ${error.message}`, 'error');
-  }
-}
-
-            // Function to save/update student nickname
-          async function saveStudentNickname() {
-  const idCard = studentIdCardInput.value.trim();
-  const nickname = studentNicknameInput.value.trim();
-
-  if (!idCard || !nickname) {
-    displayMessage('กรุณากรอกเลขบัตรและชื่อเล่นให้ครบ', 'error');
-    return;
   }
 
-  try {
-    const formData = new URLSearchParams();
-    formData.append('idCard', idCard);
-    formData.append('nickname', nickname);
-    formData.append('action', 'updateNickname');
+  async function saveStudentNickname() {
+    const idCard = document.getElementById('idCard').value.trim();
+    const nickname = document.getElementById('nickname').value.trim();
+    if (!idCard || !nickname) return alert("กรุณากรอกเลขบัตรและชื่อเล่น");
 
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: formData.toString()
-    });
+    const body = new URLSearchParams();
+    body.append('idCard', idCard);
+    body.append('nickname', nickname);
+    body.append('action', 'updateNickname');
 
-    const result = await response.json();
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body
+      });
 
-    if (result.success) {
-      displayMessage('✅ บันทึกชื่อเล่นเรียบร้อย', 'success');
-    } else {
-      displayMessage('❌ บันทึกไม่สำเร็จ: ' + result.error, 'error');
+      alert("✅ บันทึกชื่อเล่นสำเร็จ");
+    } catch (err) {
+      console.error("Save nickname error:", err);
+      alert("❌ บันทึกไม่สำเร็จ");
     }
-  } catch (error) {
-    console.error(error);
-    displayMessage('❌ เกิดข้อผิดพลาดในการส่งข้อมูล', 'error');
-  }
-}
-
-
-
-            // Event listener for เลขประจำตัวประชาชน input
-            let typingTimer; // Timer identifier
-            const doneTypingInterval = 500; // Time in ms (0.5 second)
-
-            studentIdCardInput.addEventListener('input', () => {
-                clearTimeout(typingTimer);
-                studentCodeInput.value = ''; // Clear other ID field
-                if (studentIdCardInput.value) {
-                    typingTimer = setTimeout(() => {
-                        fetchStudentDetails('idCard', studentIdCardInput.value);
-                    }, doneTypingInterval);
-                } else {
-                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
-                }
-            });
-
-            // Event listener for รหัสนักเรียน input
-            //studentCodeInput.addEventListener('input', () => {
-                clearTimeout(typingTimer);
-                studentIdCardInput.value = ''; // Clear other ID field
-                if (studentCodeInput.value) {
-                    typingTimer = setTimeout(() => {
-                        fetchStudentDetails('studentCode', studentCodeInput.value);
-                    }, doneTypingInterval);
-                } else {
-                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
-                }
-            });
-
-
-            // Function to fetch course data from Google Apps Script
-            async function fetchCourseData() {
-                courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา...</option>';
-                courseSelect.disabled = true;
-                addCourseButton.disabled = true;
-
-                try {
-                    const response = await fetch(GOOGLE_SHEET_COURSE_WEB_APP_URL);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const data = await response.json();
-
-                    if (data && data.length > 0) {
-                        // Assuming first row is headers: 'รหัสคอร์ส', 'ชื่อคอร์ส', 'ราคา', 'หน่วย'
-                        availableCourses = data.map(row => ({
-                            course_code: row['รหัสคอร์ส'],
-                            course_name: row['ชื่อคอร์ส'],
-                            price: parseFloat(row['ราคา']) || 0, // Ensure price is a number
-                            unit: row['หน่วย']
-                        }));
-                        populateCourseDropdown();
-                        displayMessage('โหลดข้อมูลวิชาสำเร็จ!', 'success');
-                    } else {
-                        availableCourses = [];
-                        courseSelect.innerHTML = '<option value="">ไม่พบข้อมูลวิชา</option>';
-                        displayMessage('ไม่พบข้อมูลวิชาใน Google Sheet.', 'info');
-                    }
-                } catch (error) {
-                    console.error('Error fetching course data:', error);
-                    courseSelect.innerHTML = '<option value="">ไม่สามารถโหลดวิชาได้</option>';
-                    displayMessage(`ไม่สามารถโหลดข้อมูลวิชา: ${error.message}. กรุณาตรวจสอบ URL Apps Script.`, 'error');
-                } finally {
-                    courseSelect.disabled = false;
-                    addCourseButton.disabled = false;
-                }
-            }
-
-            // Populate the course dropdown with fetched data
-            function populateCourseDropdown() {
-                courseSelect.innerHTML = '<option value="">--- เลือกวิชา ---</option>';
-                availableCourses.forEach(course => {
-                    const option = document.createElement('option');
-                    option.value = course.course_code;
-                    option.textContent = `${course.course_code} - ${course.course_name} (${course.price.toLocaleString()} ${course.unit})`;
-                    courseSelect.appendChild(option);
-                });
-            }
-
-            // Add selected course to the table
-            addCourseButton.addEventListener('click', () => {
-                const selectedCourseCode = courseSelect.value;
-                if (!selectedCourseCode) {
-                    displayMessage('กรุณาเลือกวิชาที่ต้องการเพิ่ม', 'info');
-                    return;
-                }
-
-                const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
-
-                if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-                    selectedCourses.push(courseToAdd);
-                    renderSelectedCourses();
-                    calculateTotals();
-                } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-                    displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
-                }
-            });
-
-            // Render selected courses in the table
-            function renderSelectedCourses() {
-                selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
-                if (selectedCourses.length === 0) {
-                    const noDataRow = document.createElement('tr');
-                    noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
-                    selectedCoursesTableBody.appendChild(noDataRow);
-                    return;
-                }
-
-                selectedCourses.forEach(course => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${course.course_code}</td>
-                        <td>${course.course_name}</td>
-                        <td>${course.price.toLocaleString()}</td>
-                        <td>${course.unit}</td>
-                        <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
-                    `;
-                    selectedCoursesTableBody.appendChild(tr);
-                });
-            }
-
-            // Remove course from table
-            selectedCoursesTableBody.addEventListener('click', (event) => {
-                const removeButton = event.target.closest('.remove-course-button');
-                if (removeButton) {
-                    const courseCodeToRemove = removeButton.dataset.courseCode;
-                    selectedCourses = selectedCourses.filter(course => course.course_code !== courseCodeToRemove);
-                    renderSelectedCourses();
-                    calculateTotals();
-                }
-            });
-
-            // Basic calculation for total amount and net amount
-            function calculateTotals() {
-                let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
-                totalAmountInput.value = sum.toLocaleString(); // Format with commas
-
-                const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
-                netAmountInput.value = (sum - fees).toLocaleString();
-            }
-
-            // Call calculation on page load and when fees input changes
-            renderSelectedCourses(); // Initial render for empty state
-            calculateTotals();
-            feesInput.addEventListener('input', calculateTotals);
-
-            // Save button functionality
-            saveButton.addEventListener('click', async () => {
-                const idCard = studentIdCardInput.value.trim();
-                const studentCode = studentCodeInput.value.trim(); 
-                const currentNickname = studentNicknameInput.value.trim();
-
-                let idType = '';
-                let idValue = '';
-
-                if (idCard) {
-                    idType = 'idCard';
-                    idValue = idCard;
-                } else if (studentCode) {
-                    idType = 'studentCode';
-                    idValue = studentCode;
-                }
-
-                // 1. Save/Update Nickname
-                if (idValue && currentNickname !== originalNickname) {
-                    await saveStudentNickname(idType, idValue, currentNickname);
-                } else if (!idValue) {
-                    displayMessage('ไม่สามารถบันทึกชื่อเล่นได้: ต้องมี เลขประจำตัวประชาชน หรือ รหัสนักเรียน', 'error');
-                }
-
-                // 2. Gather all sales record data
-                const salesRecordData = {
-                    "เลขประจำตัวประชาชน": document.getElementById("idCard").value.trim(),
-                    "รหัสนักเรียน": document.getElementById("studentCode").value.trim(),
-                    "ชื่อจริง": document.getElementById("firstName").value.trim(),
-                    "นามสกุล": document.getElementById("lastName").value.trim(),
-                    "ชื่อเล่น": document.getElementById("nickname").value.trim(),
-                    "โรงเรียน": document.getElementById("school").value.trim(),
-                    "Email": document.getElementById("email").value.trim(),
-                    "ที่อยู่": document.getElementById("address").value.trim(),
-
-                    "สถานะนักเรียน": document.getElementById("studentStatus").value.trim(),
-                    "รูปแบบการสมัคร": document.getElementById("applicationType").value.trim(),
-                    "ปีการศึกษา": document.getElementById("academicYear").value.trim(),
-                    "สาขา": document.getElementById("branch").value.trim(),
-                    "วันที่สมัคร": document.getElementById("applicationDate").value.trim(),
-                    "โปรแกรม": document.getElementById("program").value.trim(),
-                    "ซีซั่น": document.getElementById("season").value.trim(),
-                    "ระดับ": document.getElementById("classLevel").value.trim(),
-                    "โปรโมชัน": document.getElementById("promotion").value.trim(),
-                    "ส่วนลดพิเศษ": document.getElementById("discount").value.trim(),
-                    "ชำระแบบ": document.getElementById("paymentMethod").value.trim(),
-                    "หมายเหตุ": document.getElementById("notes").value.trim(),
-                    "ยอดรวม": document.getElementById("totalAmount").value.trim(),
-                    "ค่าธรรมเนียม": document.getElementById("fees").value.trim(),
-                    "สุทธิ": document.getElementById("netAmount").value.trim()
-                };
-
-                
-                // Remove empty fields
-                const filteredData = {};
-                for (const key in data) {
-                     if (data[key]) {
-                     filteredData[key] = data[key];
-                    }
-                }
-                // 3. Send all sales record data to Apps Script
-                try {
-                   fetch(API_URL, {
-                                method: 'POST',
-                                mode: 'no-cors',
-                headers: {
-                         'Content-Type': 'application/x-www-form-urlencoded'
-                         },
-
-
-                        body: JSON.stringify({
-                            action: 'saveSalesRecord', // New action for saving sales data
-                            data: salesRecordData
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const result = await response.json();
-                    if (result.success) {
-                        displayMessage('บันทึกข้อมูลการขายสำเร็จ!', 'success');
-                        // Optionally, clear the form or reset state after successful save
-                    } else {
-                        displayMessage(`บันทึกข้อมูลการขายไม่สำเร็จ: ${result.error || 'Unknown error'}`, 'error');
-                    }
-                } catch (error) {
-                    console.error('Error saving sales record:', error);
-                    displayMessage(`ไม่สามารถบันทึกข้อมูลการขายได้: ${error.message}.`, 'error');
-                }
-            });
-
-            // Initial fetches
-            fetchCourseData(); // Fetch course data on load
-document.getElementById("search-student-button").addEventListener("click", () => {
-  const idCard = studentIdCardInput.value.trim();
-  if (idCard) {
-    fetchStudentDetails("idCard", idCard);
-  } else {
-    displayMessage("กรุณากรอกเลขประจำตัวประชาชน", "info");
   }
 
-        });
-    </script>
+  // Event binding จากปุ่มเดิมใน HTML (ถ้าใช้ ID หรือ onclick ก็ใช้ชื่อฟังก์ชันนี้ได้เลย)
+  window.fetchStudentDetails = fetchStudentDetails;
+  window.saveStudentNickname = saveStudentNickname;
+</script>
+
 </body>
 </html>
