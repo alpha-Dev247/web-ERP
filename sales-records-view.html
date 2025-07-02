@@ -206,6 +206,7 @@
                     <div>
                         <label for="student-nickname" class="form-label">ชื่อเล่น</label>
                         <input type="text" id="nickname" class="form-field" placeholder="กรอกชื่อเล่นกรณีไม่อยู่ในฐานข้อมูล">
+                        <button id="save-nickname-button" class="btn btn-primary mt-2">💾 บันทึกชื่อเล่น</button>
                     </div>
                 </div>
             </div>
@@ -490,7 +491,7 @@
     idCard: idValue,
     nickname: nickname,
     action: 'updateNickname'
-    }).toString()
+    }).toString()    
     });
 
   
@@ -529,6 +530,32 @@
                 } else {
                     fetchStudentDetails('', ''); // Clear all student details if ID is empty
                 }
+
+                // ✅ ปุ่มบันทึกชื่อเล่นแยก
+document.getElementById('save-nickname-button').addEventListener('click', async () => {
+  const idCard = studentIdCardInput.value.trim();
+  const studentCode = studentCodeInput.value.trim(); 
+  const nickname = studentNicknameInput.value.trim();
+
+  let idType = '';
+  let idValue = '';
+
+  if (idCard) {
+    idType = 'idCard';
+    idValue = idCard;
+  } else if (studentCode) {
+    idType = 'studentCode';
+    idValue = studentCode;
+  }
+
+  if (!idValue) {
+    displayMessage('กรุณาระบุเลขประจำตัวประชาชนหรือรหัสนักเรียน', 'error');
+    return;
+  }
+
+  await saveStudentNickname(idType, idValue, nickname);
+});
+
             });
 
 
