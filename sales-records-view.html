@@ -475,30 +475,36 @@
     return;
   }
 
-  try {
-    const formData = new URLSearchParams();
-    formData.append(idType, idValue);
-    formData.append('nickname', nickname);
-    formData.append('action', 'updateNickname');
+try {
+  const formData = new URLSearchParams();
+  formData.append(idType, idValue);
+  formData.append('nickname', nickname);
+  formData.append('action', 'updateNickname');
 
-    const response = await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
+  await fetch(GOOGLE_SHEET_SALES_WEB_APP_URL, {
     method: 'POST',
     mode: 'no-cors',
-    headers:{
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-    body: new URLSearchParams({
-    idCard: idValue,
-    nickname: nickname,
-    action: 'updateNickname'
-    }).toString()    
-    });
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: formData.toString()
+  });
 
-  
-  } catch (error) {
-    console.error(error);
-    displayMessage('❌ เกิดข้อผิดพลาดในการส่งข้อมูล', 'error');
-  }
+  Swal.fire({
+    icon: 'success',
+    title: 'บันทึกชื่อเล่นสำเร็จ!',
+    timer: 1500,
+    showConfirmButton: false
+  });
+
+} catch (error) {
+  console.error(error);
+  Swal.fire({
+    icon: 'error',
+    title: 'เกิดข้อผิดพลาดในการส่งข้อมูล',
+    text: error.message
+  });
+}
 }
 
 
@@ -532,29 +538,22 @@
                 }
 
                 // ✅ ปุ่มบันทึกชื่อเล่นแยก
-document.getElementById('save-nickname-button').addEventListener('click', async () => {
+document.getElementById("save-nickname-button").addEventListener("click", async () => {
   const idCard = studentIdCardInput.value.trim();
-  const studentCode = studentCodeInput.value.trim(); 
+  const studentCode = studentCodeInput.value.trim();
   const nickname = studentNicknameInput.value.trim();
 
-  let idType = '';
-  let idValue = '';
+  const idType = idCard ? 'idCard' : 'studentCode';
+  const idValue = idCard || studentCode;
 
-  if (idCard) {
-    idType = 'idCard';
-    idValue = idCard;
-  } else if (studentCode) {
-    idType = 'studentCode';
-    idValue = studentCode;
-  }
-
-  if (!idValue) {
-    displayMessage('กรุณาระบุเลขประจำตัวประชาชนหรือรหัสนักเรียน', 'error');
+  if (!idValue || !nickname) {
+    Swal.fire('กรอกข้อมูลให้ครบก่อนบันทึก', '', 'warning');
     return;
   }
 
   await saveStudentNickname(idType, idValue, nickname);
 });
+
 
             });
 
@@ -768,12 +767,26 @@ document.getElementById('save-nickname-button').addEventListener('click', async 
 document.getElementById("search-student-button").addEventListener("click", () => {
   const idCard = studentIdCardInput.value.trim();
   if (idCard) {
-    fetchStudentDetails("idCard", idCard);
-  } else {
-    displayMessage("กรุณากรอกเลขประจำตัวประชาชน", "info");
-  }
+    Swal.fire({
+      title: 'กำลังค้นหานักเรียน...',
+      didOpen: () => {
+        Swal.showLoading();
+      },
+      allowOutsideClick: false,
+      allowEscapeKey: false
+    });
 
-        });
+    fetchStudentDetails("idCard", idCard).finally(() => {
+      Swal.close();
+    });
+  } else {
+    Swal.fire('โปรดกรอกเลขประจำตัวประชาชน!', '', 'info');
+  }
+});
+
     </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </body>
 </html>
