@@ -730,10 +730,10 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
                 
                 // Remove empty fields
                 const filteredData = {};
-                for (const key in data) {
-                     if (data[key]) {
-                     filteredData[key] = data[key];
-                    }
+               for (const key in salesRecordData) {
+                if (salesRecordData[key]) {
+                filteredData[key] = salesRecordData[key];
+                }
                 }
                 // 3. Send all sales record data to Apps Script
                 try {
