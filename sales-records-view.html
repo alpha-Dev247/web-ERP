@@ -210,6 +210,19 @@
                         <input type="text" id="nickname" class="form-field" placeholder="กรอกชื่อเล่นกรณีไม่อยู่ในฐานข้อมูล">
                         <button id="save-nickname-button" class="detail-action-button mt-2">💾 บันทึกชื่อเล่น</button>
                     </div>
+                    <div>
+                        <label for="school" class="form-label">โรงเรียน</label>
+                        <input type="text" id="school" class="form-field" placeholder="ชื่อโรงเรียน">
+                    </div>
+                    <div>
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" class="form-field" placeholder="example@email.com">
+                    </div>
+                    <div>
+                        <label for="address" class="form-label">ที่อยู่</label>
+                        <textarea id="address" class="form-field" rows="2" placeholder="บ้านเลขที่ ซอย ถนน เขต แขวง จังหวัด"></textarea>
+                    </div>
+
                 </div>
             </div>
 
@@ -307,8 +320,11 @@
                     <div class="flex-grow">
                         <label for="course-select" class="form-label">เลือกวิชาจากฐานข้อมูล</label>
                         <select id="course-select" class="form-field">
-                            <option value="">กำลังโหลดวิชา...</option>
+                        <option value="">--- เลือกวิชา ---</option> <!-- ✅ กำหนด default -->
                         </select>
+
+                           
+                  
                     </div>
                     
 
@@ -626,15 +642,16 @@ addCourseButton.addEventListener('click', () => {
 
 
             // Populate the course dropdown with fetched data
-            function populateCourseDropdown() {
-                courseSelect.innerHTML = '<option value="">--- เลือกวิชา ---</option>';
-                availableCourses.forEach(course => {
-                    const option = document.createElement('option');
-                    option.value = course.course_code;
-                    option.textContent = `${course.course_code} - ${course.course_name} (${course.price.toLocaleString()} ${course.unit})`;
-                    courseSelect.appendChild(option);
-                });
-            }
+           function populateCourseDropdown() {
+            courseSelect.innerHTML = '<option value="">--- เลือกวิชา ---</option>';
+            availableCourses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course.course_code;
+            option.textContent = `${course.course_code} - ${course.course_name} (${course.price.toLocaleString()} ${course.unit})`;
+            courseSelect.appendChild(option);
+         });
+        }
+
 
             // Add selected course to the table
             
@@ -811,20 +828,14 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
   url.searchParams.append("level", level);
 
   // ✅ 4. แสดงกำลังโหลด
-  Swal.fire({
-    title: '📦 กำลังโหลดวิชา...',
-    text: 'กำลังดึงข้อมูลจากระบบ',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
+    courseSelect.innerHTML = `<option disabled selected>⏳ กำลังโหลด...</option>`;
+    courseSelect.disabled = true;
 
   try {
     const res = await fetch(url.toString());
     const data = await res.json();
 
-    Swal.close();
+    courseSelect.disabled = false;
 
     if (data && data.length > 0) {
       availableCourses = data.map(row => ({
@@ -834,6 +845,7 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
         unit: 'บาท'
       }));
       populateCourseDropdown(); // ฟังก์ชันที่คุณมีอยู่แล้ว
+      
       Swal.fire('✅ สำเร็จ', `พบ ${data.length} วิชา`, 'success');
     } else {
       Swal.fire('⚠️ ไม่พบข้อมูล', 'ไม่มีวิชาตรงกับเงื่อนไข', 'info');
