@@ -218,24 +218,24 @@
                 <h2 class="section-header">2.รายละเอียดการสมัคร</h2>
                 <div class="space-y-4">
                     <div>
-                        <label for="student-status" class="form-label">สถานะนักเรียน</label>
-                        <select id="student-status" class="form-field">
+                        <label for="studentStatus" class="form-label">สถานะนักเรียน</label>
+                        <select id="studentStatus" class="form-field">
                             <option value="">เลือกสถานะ</option>
                             <option value="old">เก่า</option>
                             <option value="new">ใหม่</option>
                         </select>
                     </div>
                     <div>
-                        <label for="application-type" class="form-label">รูปแบบการสมัคร</label>
-                        <select id="application-type" class="form-field">
+                        <label for="applicationType" class="form-label">รูปแบบการสมัคร</label>
+                        <select id="applicationType" class="form-field">
                             <option value="">เลือกรูปแบบการสมัคร</option>
                             <option value="Line">Line</option>
                             <option value="Walk in">Walk in</option>
                         </select>
                     </div>
                     <div>
-                        <label for="academic-year" class="form-label">ปีการศึกษา</label>
-                        <select id="academic-year" class="form-field">
+                        <label for="academicYear" class="form-label">ปีการศึกษา</label>
+                        <select id="academicYear" class="form-field">
                             <option value="">เลือกปีการศึกษา</option>
                             <option value="2567">2567</option>
                             <option value="2568">2568</option>
@@ -277,8 +277,8 @@
                         </select>
                     </div>
                     <div>
-                        <label for="class" class="form-label">ระดับ</label>
-                        <select id="class" class="form-field">
+                        <label for="classLevel" class="form-label">ระดับ</label>
+                        <select id="classLevel" class="form-field">
                             <option value="">เลือกชั้น</option>
                             <option value="p6">ป.6</option>
                             <option value="m3">ม.3</option>
@@ -291,11 +291,16 @@
             </div>
 
             <!-- Section 3: วิชาที่สมัคร -->
+            
+
+
             <div class="card lg:col-span-2 lg:col-start-3 lg:row-start-1 flex flex-col">
                 <h2 class="section-header">3.วิชาที่สมัคร</h2>
                 <!-- Course selection and add area -->
-                 <div class="mt-2">
-                    <button id="search-courses-button" class="btn btn-primary">🔍 ค้นหาวิชา</button>
+                <div class="col-span-2 flex justify-end">
+                    <button id="search-courses-button" type="button" class="btn btn-primary">
+                        🔍 ค้นหาวิชาที่เปิดสอน
+                    </button>
                 </div>
 
                 <div class="flex items-end gap-2 mb-4">
@@ -395,6 +400,7 @@
    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+
                       
             const GOOGLE_SHEET_SALES_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWtZcyQIUQNxexbxEYSrjjEb955nnhtuRiuWJ9MRb5RyH6lu_SDhddI7tiOJ2IXYGN/exec';
 
@@ -407,14 +413,14 @@
             const studentSurnameInput = document.getElementById('lastName');
             const studentNicknameInput = document.getElementById('nickname');
 
-            const studentStatusInput = document.getElementById('student-status');
-            const applicationTypeInput = document.getElementById('application-type');
-            const academicYearInput = document.getElementById('academic-year');
+            const studentStatusInput = document.getElementById('studentStatus');
+            const applicationTypeInput = document.getElementById('applicationType');
+            const academicYearInput = document.getElementById('academicYear');
             const branchInput = document.getElementById('branch');
             const applicationDateInput = document.getElementById('application-date');
             const programInput = document.getElementById('program');
             const seasonInput = document.getElementById('season'); // Corrected ID usage
-            const classInput = document.getElementById('class'); // Corrected ID usage
+            const classInput = document.getElementById('classLevel'); // Corrected ID usage
 
             const promotionInput = document.getElementById('promotion');
             const discountInput = document.getElementById('discount');
@@ -429,6 +435,7 @@
             const netAmountInput = document.getElementById('net-amount');
             const saveButton = document.getElementById('save-button');
             const infoMessageBox = document.getElementById('infoMessageBox');
+            
 
             let availableCourses = []; // Stores all fetched course data
             let selectedCourses = []; // Stores courses currently added to the table
@@ -457,10 +464,10 @@
   text: 'กรุณารอสักครู่',
   allowOutsideClick: false,
   didOpen: () => Swal.showLoading()
-}).then(async () => {
-  
 });
-  await fetchStudentDetails("idCard", idCard);
+
+await fetchStudentDetails("idCard", idCard);
+
 });
 
 
@@ -562,7 +569,10 @@ try {
            
 
                 // ✅ ปุ่มบันทึกชื่อเล่นแยก
+                
 document.getElementById("save-nickname-button").addEventListener("click", async () => {
+
+  
   Swal.fire({
     title: '💾 กำลังบันทึก...',
     didOpen: () => {
@@ -571,15 +581,12 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
     allowOutsideClick: false,
     allowEscapeKey: false
   });
-
-  const idCard = studentIdCardInput.value.trim();
+const idCard = studentIdCardInput.value.trim();
   const studentCode = studentCodeInput.value.trim();
   const nickname = studentNicknameInput.value.trim();
-
   const idType = idCard ? 'idCard' : 'studentCode';
   const idValue = idCard || studentCode;
-
-  if (!idValue || !nickname) {
+   if (!idValue || !nickname) {
     Swal.fire('กรอกข้อมูลให้ครบก่อนบันทึก', '', 'warning');
     return;
   }
@@ -588,10 +595,7 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
   Swal.close();
 });
 
-
-            });
-
-            addCourseButton.addEventListener('click', () => {
+addCourseButton.addEventListener('click', () => {
                 const selectedCourseCode = courseSelect.value;
                 if (!selectedCourseCode) {
                     displayMessage('กรุณาเลือกวิชาที่ต้องการเพิ่ม', 'info');
@@ -605,11 +609,16 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
                     renderSelectedCourses();
                     calculateTotals();
                 } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+                } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
                     displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
                 }
             });
 
-            
+
+
+            });
+
+                    
 
 
             // Function to fetch course data from Google Apps Script
@@ -826,6 +835,68 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
 
             // Initial fetches
           
+async function fetchCourseData() {
+  const year = academicYearInput.value.trim();
+  const branch = branchInput.value.trim();
+  const program = programInput.value.trim();
+  const season = seasonInput.value.trim();
+  const level = classInput.value.trim();
+
+  // ✅ 1. ตรวจสอบว่ากรอกครบ
+  if (!year || !branch || !program || !season || !level) {
+    Swal.fire({
+      icon: 'warning',
+      title: '⚠️ กรุณากรอกตัวกรองให้ครบก่อนค้นหา',
+      confirmButtonText: 'ตกลง'
+    });
+    return;
+  }
+
+  // ✅ 2. แปลงค่า "สาขา" เป็น 1 หรือ 2
+  const branchMapped = branch.includes('เมกาบางนา') ? '1' :
+                       branch.includes('สุขาภิบาล3') ? '2' : '';
+
+  // ✅ 3. สร้าง URL จาก Web App
+  const url = new URL(GOOGLE_SHEET_COURSE_WEB_APP_URL);
+  url.searchParams.append("year", year);
+  url.searchParams.append("branch", branchMapped);
+  url.searchParams.append("program", program);
+  url.searchParams.append("season", season);
+  url.searchParams.append("level", level);
+
+  // ✅ 4. แสดงกำลังโหลด
+  Swal.fire({
+    title: '📦 กำลังโหลดวิชา...',
+    text: 'กำลังดึงข้อมูลจากระบบ',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  try {
+    const res = await fetch(url.toString());
+    const data = await res.json();
+
+    Swal.close();
+
+    if (data && data.length > 0) {
+      availableCourses = data.map(row => ({
+        course_code: row['รหัสวิชา'],
+        course_name: row['ชื่อคอร์ส'],
+        price: parseFloat(row['ราคา']) || 0,
+        unit: 'บาท'
+      }));
+      populateCourseDropdown(); // ฟังก์ชันที่คุณมีอยู่แล้ว
+      Swal.fire('✅ สำเร็จ', `พบ ${data.length} วิชา`, 'success');
+    } else {
+      Swal.fire('⚠️ ไม่พบข้อมูล', 'ไม่มีวิชาตรงกับเงื่อนไข', 'info');
+    }
+  } catch (error) {
+    Swal.close();
+    Swal.fire('❌ ล้มเหลว', `โหลดไม่สำเร็จ: ${error.message}`, 'error');
+  }
+}
 
     </script>
 
