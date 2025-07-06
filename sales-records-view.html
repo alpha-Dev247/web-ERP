@@ -468,6 +468,9 @@
                 }, 5000); // Hide after 5 seconds
             }
 
+            document.getElementById('search-courses-button').addEventListener('click', fetchCourseData);
+
+
             document.getElementById("search-student-button").addEventListener("click", async () => {
   const idCard = studentIdCardInput.value.trim();
   if (!idCard) {
@@ -679,16 +682,6 @@ addCourseButton.addEventListener('click', () => {
                 });
             }
 
-            // Remove course from table
-            selectedCoursesTableBody.addEventListener('click', (event) => {
-                const removeButton = event.target.closest('.remove-course-button');
-                if (removeButton) {
-                    const courseCodeToRemove = removeButton.dataset.courseCode;
-                    selectedCourses = selectedCourses.filter(course => course.course_code !== courseCodeToRemove);
-                    renderSelectedCourses();
-                    calculateTotals();
-                }
-            });
 
             // Basic calculation for total amount and net amount
             function calculateTotals() {
@@ -834,6 +827,8 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
   try {
     const res = await fetch(url.toString());
     const data = await res.json();
+    console.log('Fetched course data:', data);
+
 
     courseSelect.disabled = false;
 
@@ -855,8 +850,7 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
     Swal.fire('❌ ล้มเหลว', `โหลดไม่สำเร็จ: ${error.message}`, 'error');
   }
 }
- document.getElementById('search-courses-button').addEventListener('click', fetchCourseData);
-
+ 
 
     </script>
 
