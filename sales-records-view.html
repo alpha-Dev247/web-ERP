@@ -294,6 +294,10 @@
             <div class="card lg:col-span-2 lg:col-start-3 lg:row-start-1 flex flex-col">
                 <h2 class="section-header">3.วิชาที่สมัคร</h2>
                 <!-- Course selection and add area -->
+                 <div class="mt-2">
+                    <button id="search-courses-button" class="btn btn-primary">🔍 ค้นหาวิชา</button>
+                </div>
+
                 <div class="flex items-end gap-2 mb-4">
                     <div class="flex-grow">
                         <label for="course-select" class="form-label">เลือกวิชาจากฐานข้อมูล</label>
@@ -301,7 +305,7 @@
                             <option value="">กำลังโหลดวิชา...</option>
                         </select>
                     </div>
-                    <button id="search-courses-button" class="btn btn-primary mt-2">🔍 ค้นหาวิชา</button>
+                    
 
                     <button id="add-course-button" class="detail-action-button bg-orange-500 hover:bg-orange-600 px-4 py-2">
                         <i class="fas fa-plus"></i> เพิ่ม
@@ -595,7 +599,7 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
   const program = programInput.value.trim();
   const season = seasonInput.value.trim();
   const level = classInput.value.trim();
-  
+
  if (!year || !branch || !program || !season || !level) {
   Swal.fire('⚠️ โปรดกรอกตัวกรองให้ครบ', '', 'warning');
   return;
