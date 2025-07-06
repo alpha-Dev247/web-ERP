@@ -543,16 +543,7 @@ try {
 
                      // Event listener for รหัสนักเรียน input
             //studentCodeInput.addEventListener('input', () => {
-                clearTimeout(typingTimer);
-                studentIdCardInput.value = ''; // Clear other ID field
-                if (studentCodeInput.value) {
-                    typingTimer = setTimeout(() => {
-                        fetchStudentDetails('studentCode', studentCodeInput.value);
-                    }, doneTypingInterval);
-                } else {
-                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
-                }
-
+          
                 // ✅ ปุ่มบันทึกชื่อเล่นแยก
 document.getElementById("save-nickname-button").addEventListener("click", async () => {
   Swal.fire({
