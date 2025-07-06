@@ -622,62 +622,7 @@ addCourseButton.addEventListener('click', () => {
 
 
             // Function to fetch course data from Google Apps Script
-          async function fetchCourseData() {
-  const year = academicYearInput.value.trim();
-  const branch = branchInput.value.trim();
-  const program = programInput.value.trim();
-  const season = seasonInput.value.trim();
-  const level = classInput.value.trim();
 
- if (!year || !branch || !program || !season || !level) {
-  Swal.fire('⚠️ โปรดกรอกตัวกรองให้ครบ', '', 'warning');
-  return;
-}
-  const branchMapped = branch.includes('เมกาบางนา') ? '1' :
-                       branch.includes('สุขาภิบาล3') ? '2' : '';
-
-  const url = new URL(GOOGLE_SHEET_COURSE_WEB_APP_URL);
-   url.searchParams.append("year", year);
-  url.searchParams.append("branch", branchMapped);
-  url.searchParams.append("program", program);
-  url.searchParams.append("season", season);
-  url.searchParams.append("level", level);
-
-  Swal.fire({
-    title: '📦 กำลังโหลดวิชา...',
-    text: 'ระบบกำลังดึงข้อมูลจาก Google Sheet',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
-
-  try {
-    const response = await fetch(url.toString());
-    const data = await response.json();
-    Swal.close();
-
-    if (data && data.length > 0) {
-      availableCourses = data.map(row => ({
-        course_code: row['รหัสวิชา'],
-        course_name: row['ชื่อคอร์ส'],
-        price: parseFloat(row['ราคา']) || 0,
-        unit: 'บาท'
-      }));
-      populateCourseDropdown();
-      Swal.fire('✅ โหลดสำเร็จ', `${data.length} รายการ`, 'success');
-    } else {
-      availableCourses = [];
-      courseSelect.innerHTML = '<option value="">ไม่พบข้อมูลวิชา</option>';
-      Swal.fire('⚠️ ไม่พบข้อมูล', 'ไม่มีวิชาตรงกับเงื่อนไขที่เลือก', 'info');
-    }
-  } catch (err) {
-    console.error('โหลดข้อมูลคอร์สล้มเหลว', err);
-    Swal.close();
-    Swal.fire('❌ โหลดล้มเหลว', err.message, 'error');
-    courseSelect.innerHTML = '<option value="">โหลดข้อมูลไม่สำเร็จ</option>';
-  }
-}
 
 
             // Populate the course dropdown with fetched data
@@ -830,7 +775,7 @@ addCourseButton.addEventListener('click', () => {
                 }
             });
 
-            document.getElementById('search-courses-button').addEventListener('click', fetchCourseData);
+           
 
 
             // Initial fetches
@@ -853,8 +798,9 @@ async function fetchCourseData() {
   }
 
   // ✅ 2. แปลงค่า "สาขา" เป็น 1 หรือ 2
-  const branchMapped = branch.includes('เมกาบางนา') ? '1' :
-                       branch.includes('สุขาภิบาล3') ? '2' : '';
+const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-account' ? '1' :
+                     branch === 'sukhapiban3' || branch === 'sukhapiban3-off-account' ? '2' : '';
+
 
   // ✅ 3. สร้าง URL จาก Web App
   const url = new URL(GOOGLE_SHEET_COURSE_WEB_APP_URL);
@@ -897,6 +843,8 @@ async function fetchCourseData() {
     Swal.fire('❌ ล้มเหลว', `โหลดไม่สำเร็จ: ${error.message}`, 'error');
   }
 }
+ document.getElementById('search-courses-button').addEventListener('click', fetchCourseData);
+
 
     </script>
 
