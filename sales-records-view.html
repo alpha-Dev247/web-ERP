@@ -784,11 +784,22 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
 document.getElementById("search-student-button").addEventListener("click", async () => {
   const idCard = studentIdCardInput.value.trim();
   if (idCard) {
+    Swal.fire({
+      title: '📡 กำลังค้นหานักเรียน...',
+      text: 'กรุณารอสักครู่',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     await fetchStudentDetails("idCard", idCard);
+    Swal.close(); // ปิดหลังค้นหาเสร็จ
   } else {
-    Swal.fire('โปรดกรอกเลขประจำตัวประชาชน!', '', 'info');
+    Swal.fire('กรุณากรอกเลขประจำตัวประชาชน', '', 'warning');
   }
 });
+
 
 
     </script>
