@@ -393,9 +393,7 @@
             const GOOGLE_SHEET_SALES_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWtZcyQIUQNxexbxEYSrjjEb955nnhtuRiuWJ9MRb5RyH6lu_SDhddI7tiOJ2IXYGN/exec';
 
             // IMPORTANT: Replace with your deployed Google Apps Script Web App URL for COURSE DATA
-            const GOOGLE_SHEET_COURSE_WEB_APP_URL = 'YOUR_DEPLOYED_COURSE_DATA_WEB_APP_URL_HERE'; // Example: https://script.google.com/macros/s/AKfycbz_YOUR_COURSE_ID_HERE/exec';
-
-            
+            const GOOGLE_SHEET_COURSE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwg5U59_AX4afg7tBc8ucjEWpWASx-5StmYMTum2KS52H8b7zkBk1lyQYhJvIaelMjbMA/exec';        
 
             const studentIdCardInput = document.getElementById('idCard');
             const studentCodeInput = document.getElementById('studentCode'); 
@@ -590,41 +588,44 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
 
             // Function to fetch course data from Google Apps Script
             async function fetchCourseData() {
-                courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา...</option>';
-                courseSelect.disabled = true;
-                addCourseButton.disabled = true;
+  const year = academicYearInput.value.trim();
+  const branch = branchInput.value.trim(); // แปลงเป็น '1' หรือ '2' ด้านล่าง
+  const program = programInput.value.trim();
+  const season = seasonInput.value.trim();
+  const level = classInput.value.trim();
 
-                try {
-                    const response = await fetch(GOOGLE_SHEET_COURSE_WEB_APP_URL);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    const data = await response.json();
+  const branchMapped = branch.includes('เมกาบางนา') ? '1' :
+                       branch.includes('สุขาภิบาล3') ? '2' : '';
 
-                    if (data && data.length > 0) {
-                        // Assuming first row is headers: 'รหัสคอร์ส', 'ชื่อคอร์ส', 'ราคา', 'หน่วย'
-                        availableCourses = data.map(row => ({
-                            course_code: row['รหัสคอร์ส'],
-                            course_name: row['ชื่อคอร์ส'],
-                            price: parseFloat(row['ราคา']) || 0, // Ensure price is a number
-                            unit: row['หน่วย']
-                        }));
-                        populateCourseDropdown();
-                        displayMessage('โหลดข้อมูลวิชาสำเร็จ!', 'success');
-                    } else {
-                        availableCourses = [];
-                        courseSelect.innerHTML = '<option value="">ไม่พบข้อมูลวิชา</option>';
-                        displayMessage('ไม่พบข้อมูลวิชาใน Google Sheet.', 'info');
-                    }
-                } catch (error) {
-                    console.error('Error fetching course data:', error);
-                    courseSelect.innerHTML = '<option value="">ไม่สามารถโหลดวิชาได้</option>';
-                    displayMessage(`ไม่สามารถโหลดข้อมูลวิชา: ${error.message}. กรุณาตรวจสอบ URL Apps Script.`, 'error');
-                } finally {
-                    courseSelect.disabled = false;
-                    addCourseButton.disabled = false;
-                }
-            }
+  const url = new URL(GOOGLE_SHEET_COURSE_WEB_APP_URL);
+  url.searchParams.append("year", year);
+  url.searchParams.append("branch", branchMapped);
+  url.searchParams.append("program", program);
+  url.searchParams.append("season", season);
+  url.searchParams.append("level", level);
+
+  try {
+    courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา...</option>';
+    const response = await fetch(url.toString());
+    const data = await response.json();
+
+    if (data && data.length > 0) {
+      availableCourses = data.map(row => ({
+        course_code: row['รหัสวิชา'],
+        course_name: row['ชื่อคอร์ส'],
+        price: parseFloat(row['ราคา']) || 0,
+        unit: 'บาท' // หรือ row['หน่วย'] ถ้ามี
+      }));
+      populateCourseDropdown();
+    } else {
+      availableCourses = [];
+      courseSelect.innerHTML = '<option value="">ไม่พบข้อมูลวิชา</option>';
+    }
+  } catch (err) {
+    console.error('โหลดข้อมูลคอร์สล้มเหลว', err);
+    courseSelect.innerHTML = '<option value="">โหลดข้อมูลไม่สำเร็จ</option>';
+  }
+}
 
             // Populate the course dropdown with fetched data
             function populateCourseDropdown() {
