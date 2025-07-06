@@ -301,6 +301,8 @@
                             <option value="">กำลังโหลดวิชา...</option>
                         </select>
                     </div>
+                    <button id="search-courses-button" class="btn btn-primary mt-2">🔍 ค้นหาวิชา</button>
+
                     <button id="add-course-button" class="detail-action-button bg-orange-500 hover:bg-orange-600 px-4 py-2">
                         <i class="fas fa-plus"></i> เพิ่ม
                     </button>
@@ -593,12 +595,16 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
   const program = programInput.value.trim();
   const season = seasonInput.value.trim();
   const level = classInput.value.trim();
-
+  
+ if (!year || !branch || !program || !season || !level) {
+  Swal.fire('⚠️ โปรดกรอกตัวกรองให้ครบ', '', 'warning');
+  return;
+}
   const branchMapped = branch.includes('เมกาบางนา') ? '1' :
                        branch.includes('สุขาภิบาล3') ? '2' : '';
 
   const url = new URL(GOOGLE_SHEET_COURSE_WEB_APP_URL);
-  url.searchParams.append("year", year);
+   url.searchParams.append("year", year);
   url.searchParams.append("branch", branchMapped);
   url.searchParams.append("program", program);
   url.searchParams.append("season", season);
@@ -807,8 +813,11 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
                 }
             });
 
+            document.getElementById('search-courses-button').addEventListener('click', fetchCourseData);
+
+
             // Initial fetches
-            fetchCourseData(); // Fetch course data on load
+          
 
     </script>
 
