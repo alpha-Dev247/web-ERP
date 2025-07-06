@@ -389,6 +389,7 @@
    
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+                      
             const GOOGLE_SHEET_SALES_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWtZcyQIUQNxexbxEYSrjjEb955nnhtuRiuWJ9MRb5RyH6lu_SDhddI7tiOJ2IXYGN/exec';
 
             // IMPORTANT: Replace with your deployed Google Apps Script Web App URL for COURSE DATA
@@ -439,6 +440,27 @@
                     infoMessageBox.style.display = 'none';
                 }, 5000); // Hide after 5 seconds
             }
+
+            document.getElementById("search-student-button").addEventListener("click", async () => {
+  const idCard = studentIdCardInput.value.trim();
+  if (!idCard) {
+    Swal.fire('โปรดกรอกเลขประจำตัวประชาชน!', '', 'info');
+    return;
+  }
+
+ Swal.fire({
+  title: '📡 กำลังค้นหานักเรียน...',
+  text: 'กรุณารอสักครู่',
+  allowOutsideClick: false,
+  didOpen: () => Swal.showLoading()
+}).then(async () => {
+  await fetchStudentDetails("idCard", idCard);
+});
+
+
+  await fetchStudentDetails("idCard", idCard);
+});
+
 
             // Function to fetch student details from Google Apps Script
 async function fetchStudentDetails(searchType, searchValue) {
@@ -774,27 +796,6 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
 
             // Initial fetches
             fetchCourseData(); // Fetch course data on load
-document.getElementById("search-student-button").addEventListener("click", async () => {
-  const idCard = studentIdCardInput.value.trim();
-  if (!idCard) {
-    Swal.fire('โปรดกรอกเลขประจำตัวประชาชน!', '', 'info');
-    return;
-  }
-
-  // 👇 ใส่ loading ตรงนี้เท่านั้น
-  Swal.fire({
-    title: '📡 กำลังค้นหานักเรียน...',
-    text: 'กรุณารอสักครู่',
-    allowOutsideClick: false,
-    didOpen: () => Swal.showLoading()
-  });
-
-  await fetchStudentDetails("idCard", idCard);
-
-  // ✅ loading ปิดไปใน fetchStudentDetails แล้วหลังจากจบ
-});
-
-
 
     </script>
 
