@@ -443,21 +443,10 @@
             // Function to fetch student details from Google Apps Script
 async function fetchStudentDetails(searchType, searchValue) {
   try {
-    Swal.fire({
-      title: '📡 กำลังค้นหานักเรียน...',
-      text: 'กรุณารอสักครู่',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
     const url = new URL(GOOGLE_SHEET_SALES_WEB_APP_URL);
     url.searchParams.append(searchType, searchValue);
     const response = await fetch(url.toString());
     const data = await response.json();
-
-    Swal.close(); // ปิดหลังโหลดเสร็จ
 
     if (data && data['ชื่อจริง']) {
       studentNameInput.value = data['ชื่อจริง'] || '';
@@ -478,11 +467,11 @@ async function fetchStudentDetails(searchType, searchValue) {
       Swal.fire('ℹ️ ไม่พบข้อมูล', 'กรุณากรอกด้วยตนเอง', 'info');
     }
   } catch (error) {
-    Swal.close();
     console.error('Error fetching student details:', error);
     Swal.fire('❌ เกิดข้อผิดพลาด', error.message, 'error');
   }
 }
+
 
 
             // Function to save/update student nickname
@@ -783,12 +772,24 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
             fetchCourseData(); // Fetch course data on load
 document.getElementById("search-student-button").addEventListener("click", async () => {
   const idCard = studentIdCardInput.value.trim();
-  if (idCard) {
-    await fetchStudentDetails("idCard", idCard);
-  } else {
+  if (!idCard) {
     Swal.fire('โปรดกรอกเลขประจำตัวประชาชน!', '', 'info');
+    return;
   }
+
+  // 👇 ใส่ loading ตรงนี้เท่านั้น
+  Swal.fire({
+    title: '📡 กำลังค้นหานักเรียน...',
+    text: 'กรุณารอสักครู่',
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+
+  await fetchStudentDetails("idCard", idCard);
+
+  // ✅ loading ปิดไปใน fetchStudentDetails แล้วหลังจากจบ
 });
+
 
 
     </script>
