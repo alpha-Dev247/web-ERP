@@ -541,9 +541,30 @@ try {
             let typingTimer; // Timer identifier
             const doneTypingInterval = 500; // Time in ms (0.5 second)
 
-                     // Event listener for รหัสนักเรียน input
+            studentIdCardInput.addEventListener('input', () => {
+                clearTimeout(typingTimer);
+                studentCodeInput.value = ''; // Clear other ID field
+                if (studentIdCardInput.value) {
+                    typingTimer = setTimeout(() => {
+                        fetchStudentDetails('idCard', studentIdCardInput.value);
+                    }, doneTypingInterval);
+                } else {
+                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
+                }
+            });
+
+            // Event listener for รหัสนักเรียน input
             //studentCodeInput.addEventListener('input', () => {
-          
+                clearTimeout(typingTimer);
+                studentIdCardInput.value = ''; // Clear other ID field
+                if (studentCodeInput.value) {
+                    typingTimer = setTimeout(() => {
+                        fetchStudentDetails('studentCode', studentCodeInput.value);
+                    }, doneTypingInterval);
+                } else {
+                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
+                }
+
                 // ✅ ปุ่มบันทึกชื่อเล่นแยก
 document.getElementById("save-nickname-button").addEventListener("click", async () => {
   Swal.fire({
@@ -784,22 +805,11 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
 document.getElementById("search-student-button").addEventListener("click", async () => {
   const idCard = studentIdCardInput.value.trim();
   if (idCard) {
-    Swal.fire({
-      title: '📡 กำลังค้นหานักเรียน...',
-      text: 'กรุณารอสักครู่',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
     await fetchStudentDetails("idCard", idCard);
-    Swal.close(); // ปิดหลังค้นหาเสร็จ
   } else {
-    Swal.fire('กรุณากรอกเลขประจำตัวประชาชน', '', 'warning');
+    Swal.fire('โปรดกรอกเลขประจำตัวประชาชน!', '', 'info');
   }
 });
-
 
 
     </script>
