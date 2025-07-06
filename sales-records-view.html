@@ -587,9 +587,9 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
 
 
             // Function to fetch course data from Google Apps Script
-            async function fetchCourseData() {
+          async function fetchCourseData() {
   const year = academicYearInput.value.trim();
-  const branch = branchInput.value.trim(); // แปลงเป็น '1' หรือ '2' ด้านล่าง
+  const branch = branchInput.value.trim();
   const program = programInput.value.trim();
   const season = seasonInput.value.trim();
   const level = classInput.value.trim();
@@ -604,28 +604,42 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
   url.searchParams.append("season", season);
   url.searchParams.append("level", level);
 
+  Swal.fire({
+    title: '📦 กำลังโหลดวิชา...',
+    text: 'ระบบกำลังดึงข้อมูลจาก Google Sheet',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
   try {
-    courseSelect.innerHTML = '<option value="">กำลังโหลดวิชา...</option>';
     const response = await fetch(url.toString());
     const data = await response.json();
+    Swal.close();
 
     if (data && data.length > 0) {
       availableCourses = data.map(row => ({
         course_code: row['รหัสวิชา'],
         course_name: row['ชื่อคอร์ส'],
         price: parseFloat(row['ราคา']) || 0,
-        unit: 'บาท' // หรือ row['หน่วย'] ถ้ามี
+        unit: 'บาท'
       }));
       populateCourseDropdown();
+      Swal.fire('✅ โหลดสำเร็จ', `${data.length} รายการ`, 'success');
     } else {
       availableCourses = [];
       courseSelect.innerHTML = '<option value="">ไม่พบข้อมูลวิชา</option>';
+      Swal.fire('⚠️ ไม่พบข้อมูล', 'ไม่มีวิชาตรงกับเงื่อนไขที่เลือก', 'info');
     }
   } catch (err) {
     console.error('โหลดข้อมูลคอร์สล้มเหลว', err);
+    Swal.close();
+    Swal.fire('❌ โหลดล้มเหลว', err.message, 'error');
     courseSelect.innerHTML = '<option value="">โหลดข้อมูลไม่สำเร็จ</option>';
   }
 }
+
 
             // Populate the course dropdown with fetched data
             function populateCourseDropdown() {
