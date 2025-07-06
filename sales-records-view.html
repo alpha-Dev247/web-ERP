@@ -417,7 +417,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-                      
+            const selectedCoursesTableBody = document.getElementById('selected-courses-table-body');          
             const GOOGLE_SHEET_SALES_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWtZcyQIUQNxexbxEYSrjjEb955nnhtuRiuWJ9MRb5RyH6lu_SDhddI7tiOJ2IXYGN/exec';
 
             // IMPORTANT: Replace with your deployed Google Apps Script Web App URL for COURSE DATA
@@ -445,7 +445,7 @@
 
             const courseSelect = document.getElementById('course-select');
             const addCourseButton = document.getElementById('add-course-button');
-            const selectedCoursesTableBody = document.getElementById('selected-courses-table-body');
+            
             const totalAmountInput = document.getElementById('total-amount');
             const feesInput = document.getElementById('fees');
             const netAmountInput = document.getElementById('net-amount');
