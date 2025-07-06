@@ -266,8 +266,8 @@
                         </select>
                     </div>
                     <div>
-                        <label for="Season" class="form-label">Season</label>
-                        <select id="Season" class="form-field">
+                        <label for="season" class="form-label">Season</label>
+                        <select id="season" class="form-field">
                             <option value="">เลือก Season</option>
                             <option value="S1">1</option>
                             <option value="S2">2</option>
@@ -413,7 +413,7 @@
             const branchInput = document.getElementById('branch');
             const applicationDateInput = document.getElementById('application-date');
             const programInput = document.getElementById('program');
-            const seasonInput = document.getElementById('Season'); // Corrected ID usage
+            const seasonInput = document.getElementById('season'); // Corrected ID usage
             const classInput = document.getElementById('class'); // Corrected ID usage
 
             const promotionInput = document.getElementById('promotion');
@@ -591,6 +591,26 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
 
             });
 
+            addCourseButton.addEventListener('click', () => {
+                const selectedCourseCode = courseSelect.value;
+                if (!selectedCourseCode) {
+                    displayMessage('กรุณาเลือกวิชาที่ต้องการเพิ่ม', 'info');
+                    return;
+                }
+
+                const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
+
+                if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+                    selectedCourses.push(courseToAdd);
+                    renderSelectedCourses();
+                    calculateTotals();
+                } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+                    displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
+                }
+            });
+
+            
+
 
             // Function to fetch course data from Google Apps Script
           async function fetchCourseData() {
@@ -663,23 +683,7 @@ document.getElementById("save-nickname-button").addEventListener("click", async 
             }
 
             // Add selected course to the table
-            addCourseButton.addEventListener('click', () => {
-                const selectedCourseCode = courseSelect.value;
-                if (!selectedCourseCode) {
-                    displayMessage('กรุณาเลือกวิชาที่ต้องการเพิ่ม', 'info');
-                    return;
-                }
-
-                const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
-
-                if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-                    selectedCourses.push(courseToAdd);
-                    renderSelectedCourses();
-                    calculateTotals();
-                } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-                    displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
-                }
-            });
+            
 
             // Render selected courses in the table
             function renderSelectedCourses() {
