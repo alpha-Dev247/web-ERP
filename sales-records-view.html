@@ -542,16 +542,7 @@ try {
             const doneTypingInterval = 500; // Time in ms (0.5 second)
 
             // Event listener for รหัสนักเรียน input
-            //studentCodeInput.addEventListener('input', () => {
-                clearTimeout(typingTimer);
-                studentIdCardInput.value = ''; // Clear other ID field
-                if (studentCodeInput.value) {
-                    typingTimer = setTimeout(() => {
-                        fetchStudentDetails('studentCode', studentCodeInput.value);
-                    }, doneTypingInterval);
-                } else {
-                    fetchStudentDetails('', ''); // Clear all student details if ID is empty
-                }
+           
 
                 // ✅ ปุ่มบันทึกชื่อเล่นแยก
 document.getElementById("save-nickname-button").addEventListener("click", async () => {
