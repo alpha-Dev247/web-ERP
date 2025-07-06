@@ -448,6 +448,8 @@ async function fetchStudentDetails(searchType, searchValue) {
     const response = await fetch(url.toString());
     const data = await response.json();
 
+    Swal.close(); // 🟢 ปิด loading เสมอก่อนแสดงผล
+
     if (data && data['ชื่อจริง']) {
       studentNameInput.value = data['ชื่อจริง'] || '';
       studentCodeInput.value = data['รหัสนักเรียน'] || '';
@@ -468,9 +470,11 @@ async function fetchStudentDetails(searchType, searchValue) {
     }
   } catch (error) {
     console.error('Error fetching student details:', error);
+    Swal.close(); // 🛑 ปิด Loading ตอนเกิด error ด้วย
     Swal.fire('❌ เกิดข้อผิดพลาด', error.message, 'error');
   }
 }
+
 
 
 
