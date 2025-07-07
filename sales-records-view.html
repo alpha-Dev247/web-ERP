@@ -593,7 +593,7 @@ function populateCourseDropdown() {
   availableCourses.forEach(course => {
     const option = document.createElement('option');
     option.value = course.course_code;
-    option.textContent = `${course.course_code} | ${course.course_name} | ${course.day || ''} ${course.time || ''} | สถานะ: ${course.status || ''} | ราคา: ${course.price || ''} | บาท`;
+    option.textContent = `${course.course_code} | ${course.course_name} | ${course.day || ''} ${course.time || ''} | สถานะ: ${course.status || ''} | ราคา: ${course.price || ''} บาท`;
     courseSelect.appendChild(option);
   });
 }
