@@ -457,32 +457,10 @@
             let selectedCourses = []; // Stores courses currently added to the table
             let originalNickname = ''; // To track if nickname was changed from database
 
-            function renderSelectedCourses() {
-                selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
-                if (selectedCourses.length === 0) {
-                    const noDataRow = document.createElement('tr');
-                    noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
-                    selectedCoursesTableBody.appendChild(noDataRow);
-                    return;
-                }
-
-                selectedCourses.forEach(course => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${course.course_code}</td>
-                        <td>${course.course_name}</td>
-                        <td>${course.price.toLocaleString()}</td>
-                        <td>${course.unit}</td>
-                        <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
-                    `;
-                    selectedCoursesTableBody.appendChild(tr);
-                });
-            }
-
-            renderSelectedCourses();
-            calculateTotals();
-
+            
             // Initial fetches
+
+            
           
 async function fetchCourseData() {
   const year = academicYearInput.value.trim();
@@ -715,6 +693,33 @@ const idCard = studentIdCardInput.value.trim();
   Swal.close();
 });
 
+function renderSelectedCourses() {
+                selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
+                if (selectedCourses.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
+                    selectedCoursesTableBody.appendChild(noDataRow);
+                    return;
+                }
+
+                selectedCourses.forEach(course => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${course.course_code}</td>
+                        <td>${course.course_name}</td>
+                        <td>${course.price.toLocaleString()}</td>
+                        <td>${course.unit}</td>
+                        <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
+                    `;
+                    selectedCoursesTableBody.appendChild(tr);
+                });
+            }
+
+            renderSelectedCourses();
+            calculateTotals();
+
+
+
 addCourseButton.addEventListener('click', () => {
     const selectedCourseCode = courseSelect.value;
     if (!selectedCourseCode) {
@@ -757,9 +762,7 @@ document.addEventListener('click', function(e) {
                 netAmountInput.value = (sum - fees).toLocaleString();
             }
 
-            // Call calculation on page load and when fees input changes
-            renderSelectedCourses(); // Initial render for empty state
-            calculateTotals();
+
             feesInput.addEventListener('input', calculateTotals);
 
             // Save button functionality
