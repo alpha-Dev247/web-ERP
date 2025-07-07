@@ -470,14 +470,15 @@
                 }
 
                 selectedCourses.forEach(course => {
-                    const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td>${course.course_code}</td>
-                        <td>${course.course_name}</td>
-                        <td>${course.price.toLocaleString()}</td>
-                        <td>${course.unit}</td>
-                        <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
-                    `;
+                    <td>${course.course_code}</td>
+                    <td>${course.course_name}</td>
+                    <td>${course.price.toLocaleString()}</td>
+                    <td>${course.unit}</td>
+                    <td>${course.status || '-'}</td> <!-- ✅ เพิ่มตรงนี้ -->
+                    <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
+                `;
+
                     selectedCoursesTableBody.appendChild(tr);
                 });
             }
@@ -563,7 +564,8 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
         course_code: row['รหัสวิชา'],
         course_name: row['ชื่อคอร์ส'],
         price: parseFloat(row['ราคา']) || 0,
-        unit: 'บาท'
+        unit: 'บาท',
+        status: row['สถานะ']
       }));
       populateCourseDropdown(); // ฟังก์ชันที่คุณมีอยู่แล้ว
       
@@ -588,7 +590,7 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
     availableCourses.forEach(course => {
       const option = document.createElement('option');
       option.value = course.course_code;
-      option.textContent = `${course.course_code} - ${course.course_name} (${course.price.toLocaleString()} ${course.unit})`;
+      option.textContent = `${course['รหัสวิชา']} | ${course['ชื่อคอร์ส']} | ${course['วัน']} ${course['เวลา']} | สถานะ: ${course['สถานะ']}`;
       courseSelect.appendChild(option);
     });
   }
