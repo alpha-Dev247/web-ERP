@@ -497,7 +497,15 @@ async function fetchCourseData() {
   const branch = branchInput.value.trim();
   const program = programInput.value.trim();
   const season = seasonInput.value.trim();
-  const level = classInput.value.trim();
+   const levelMap = {
+  p6: "ป.6",
+  m3: "ม.3",
+  m4: "ม.4",
+  m5: "ม.5",
+  m6: "ม.6"
+};
+const level = levelMap[classInput.value.trim()] || '';
+
   const searchButton = document.getElementById('search-courses-button');
 
   // ✅ 1. ตรวจสอบว่ากรอกครบ
