@@ -460,6 +460,36 @@
             
             // Initial fetches
 
+            function renderSelectedCourses() {
+                selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
+                if (selectedCourses.length === 0) {
+                    const noDataRow = document.createElement('tr');
+                    noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
+                    selectedCoursesTableBody.appendChild(noDataRow);
+                    return;
+                }
+
+                selectedCourses.forEach(course => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${course.course_code}</td>
+                        <td>${course.course_name}</td>
+                        <td>${course.price.toLocaleString()}</td>
+                        <td>${course.unit}</td>
+                        <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
+                    `;
+                    selectedCoursesTableBody.appendChild(tr);
+                });
+            }
+
+             function calculateTotals() {
+                let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
+                totalAmountInput.value = sum.toLocaleString(); // Format with commas
+
+                const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
+                netAmountInput.value = (sum - fees).toLocaleString();
+            }
+
             
           
 async function fetchCourseData() {
@@ -468,6 +498,7 @@ async function fetchCourseData() {
   const program = programInput.value.trim();
   const season = seasonInput.value.trim();
   const level = classInput.value.trim();
+  const searchButton = document.getElementById('search-courses-button');
 
   // ✅ 1. ตรวจสอบว่ากรอกครบ
   if (!year || !branch || !program || !season || !level) {
@@ -478,6 +509,9 @@ async function fetchCourseData() {
     });
     return;
   }
+
+  searchButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังโหลด...';
+searchButton.disabled = true;
 
   // ✅ 2. แปลงค่า "สาขา" เป็น 1 หรือ 2
 const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-account' ? '1' :
@@ -520,6 +554,12 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
   } catch (error) {
     Swal.close();
     Swal.fire('❌ ล้มเหลว', `โหลดไม่สำเร็จ: ${error.message}`, 'error');
+
+    } finally {
+    // ✅ คืนสถานะปุ่ม
+    searchButton.innerHTML = '🔍 ค้นหาวิชาที่เปิดสอน';
+    searchButton.disabled = false;
+
   }
 }
 
@@ -692,31 +732,7 @@ const idCard = studentIdCardInput.value.trim();
   await saveStudentNickname(idType, idValue, nickname);
   Swal.close();
 });
-
-function renderSelectedCourses() {
-                selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
-                if (selectedCourses.length === 0) {
-                    const noDataRow = document.createElement('tr');
-                    noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
-                    selectedCoursesTableBody.appendChild(noDataRow);
-                    return;
-                }
-
-                selectedCourses.forEach(course => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${course.course_code}</td>
-                        <td>${course.course_name}</td>
-                        <td>${course.price.toLocaleString()}</td>
-                        <td>${course.unit}</td>
-                        <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
-                    `;
-                    selectedCoursesTableBody.appendChild(tr);
-                });
-            }
-
-            renderSelectedCourses();
-            calculateTotals();
+ 
 
 
 
@@ -754,13 +770,7 @@ document.addEventListener('click', function(e) {
                 
 
             // Basic calculation for total amount and net amount
-            function calculateTotals() {
-                let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
-                totalAmountInput.value = sum.toLocaleString(); // Format with commas
-
-                const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
-                netAmountInput.value = (sum - fees).toLocaleString();
-            }
+           
 
 
             feesInput.addEventListener('input', calculateTotals);
