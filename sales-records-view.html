@@ -460,6 +460,82 @@
             renderSelectedCourses();
             calculateTotals();
 
+            // Initial fetches
+          
+async function fetchCourseData() {
+  const year = academicYearInput.value.trim();
+  const branch = branchInput.value.trim();
+  const program = programInput.value.trim();
+  const season = seasonInput.value.trim();
+  const level = classInput.value.trim();
+
+  // ✅ 1. ตรวจสอบว่ากรอกครบ
+  if (!year || !branch || !program || !season || !level) {
+    Swal.fire({
+      icon: 'warning',
+      title: '⚠️ กรุณากรอกตัวกรองให้ครบก่อนค้นหา',
+      confirmButtonText: 'ตกลง'
+    });
+    return;
+  }
+
+  // ✅ 2. แปลงค่า "สาขา" เป็น 1 หรือ 2
+const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-account' ? '1' :
+                     branch === 'sukhapiban3' || branch === 'sukhapiban3-off-account' ? '2' : '';
+
+
+  // ✅ 3. สร้าง URL จาก Web App
+  const url = new URL(GOOGLE_SHEET_COURSE_WEB_APP_URL);
+  url.searchParams.append("year", year);
+  url.searchParams.append("branch", branchMapped);
+  url.searchParams.append("program", program);
+  url.searchParams.append("season", season);
+  url.searchParams.append("level", level);
+
+  // ✅ 4. แสดงกำลังโหลด
+    courseSelect.innerHTML = `<option disabled selected>⏳ กำลังโหลด...</option>`;
+    courseSelect.disabled = true;
+
+  try {
+    const res = await fetch(url.toString());
+    const data = await res.json();
+    console.log('Fetched course data:', data);
+
+
+    courseSelect.disabled = false;
+
+    if (data && data.length > 0) {
+      availableCourses = data.map(row => ({
+        course_code: row['รหัสวิชา'],
+        course_name: row['ชื่อคอร์ส'],
+        price: parseFloat(row['ราคา']) || 0,
+        unit: 'บาท'
+      }));
+      populateCourseDropdown(); // ฟังก์ชันที่คุณมีอยู่แล้ว
+      
+      Swal.fire('✅ สำเร็จ', `พบ ${data.length} วิชา`, 'success');
+    } else {
+      Swal.fire('⚠️ ไม่พบข้อมูล', 'ไม่มีวิชาตรงกับเงื่อนไข', 'info');
+    }
+  } catch (error) {
+    Swal.close();
+    Swal.fire('❌ ล้มเหลว', `โหลดไม่สำเร็จ: ${error.message}`, 'error');
+  }
+}
+
+ function populateCourseDropdown() {
+    courseSelect.innerHTML = '<option value="">--- เลือกวิชา ---</option>';
+    availableCourses.forEach(course => {
+      const option = document.createElement('option');
+      option.value = course.course_code;
+      option.textContent = `${course.course_code} - ${course.course_name} (${course.price.toLocaleString()} ${course.unit})`;
+      courseSelect.appendChild(option);
+    });
+  }
+
+
+
+
             // Utility function to display messages
             function displayMessage(message, type = "info") {
                 infoMessageBox.textContent = message;
@@ -648,28 +724,7 @@ document.addEventListener('click', function(e) {
 
                     
 
-
-            // Function to fetch course data from Google Apps Script
-
-
-
-            // Populate the course dropdown with fetched data
-           function populateCourseDropdown() {
-            courseSelect.innerHTML = '<option value="">--- เลือกวิชา ---</option>';
-            availableCourses.forEach(course => {
-            const option = document.createElement('option');
-            option.value = course.course_code;
-            option.textContent = `${course.course_code} - ${course.course_name} (${course.price.toLocaleString()} ${course.unit})`;
-            courseSelect.appendChild(option);
-         });
-        }
-
-
-            // Add selected course to the table
-            
-
-            // Render selected courses in the table
-            function renderSelectedCourses() {
+                function renderSelectedCourses() {
                 selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
                 if (selectedCourses.length === 0) {
                     const noDataRow = document.createElement('tr');
@@ -795,71 +850,6 @@ document.addEventListener('click', function(e) {
             });
 
            
-
-
-            // Initial fetches
-          
-async function fetchCourseData() {
-  const year = academicYearInput.value.trim();
-  const branch = branchInput.value.trim();
-  const program = programInput.value.trim();
-  const season = seasonInput.value.trim();
-  const level = classInput.value.trim();
-
-  // ✅ 1. ตรวจสอบว่ากรอกครบ
-  if (!year || !branch || !program || !season || !level) {
-    Swal.fire({
-      icon: 'warning',
-      title: '⚠️ กรุณากรอกตัวกรองให้ครบก่อนค้นหา',
-      confirmButtonText: 'ตกลง'
-    });
-    return;
-  }
-
-  // ✅ 2. แปลงค่า "สาขา" เป็น 1 หรือ 2
-const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-account' ? '1' :
-                     branch === 'sukhapiban3' || branch === 'sukhapiban3-off-account' ? '2' : '';
-
-
-  // ✅ 3. สร้าง URL จาก Web App
-  const url = new URL(GOOGLE_SHEET_COURSE_WEB_APP_URL);
-  url.searchParams.append("year", year);
-  url.searchParams.append("branch", branchMapped);
-  url.searchParams.append("program", program);
-  url.searchParams.append("season", season);
-  url.searchParams.append("level", level);
-
-  // ✅ 4. แสดงกำลังโหลด
-    courseSelect.innerHTML = `<option disabled selected>⏳ กำลังโหลด...</option>`;
-    courseSelect.disabled = true;
-
-  try {
-    const res = await fetch(url.toString());
-    const data = await res.json();
-    console.log('Fetched course data:', data);
-
-
-    courseSelect.disabled = false;
-
-    if (data && data.length > 0) {
-      availableCourses = data.map(row => ({
-        course_code: row['รหัสวิชา'],
-        course_name: row['ชื่อคอร์ส'],
-        price: parseFloat(row['ราคา']) || 0,
-        unit: 'บาท'
-      }));
-      populateCourseDropdown(); // ฟังก์ชันที่คุณมีอยู่แล้ว
-      
-      Swal.fire('✅ สำเร็จ', `พบ ${data.length} วิชา`, 'success');
-    } else {
-      Swal.fire('⚠️ ไม่พบข้อมูล', 'ไม่มีวิชาตรงกับเงื่อนไข', 'info');
-    }
-  } catch (error) {
-    Swal.close();
-    Swal.fire('❌ ล้มเหลว', `โหลดไม่สำเร็จ: ${error.message}`, 'error');
-  }
-}
- 
 
     </script>
 
