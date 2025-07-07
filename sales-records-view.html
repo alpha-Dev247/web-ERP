@@ -341,9 +341,10 @@
                                 <tr>
                                     <th>รหัสคอร์ส</th>
                                     <th>ชื่อคอร์ส</th>
+                                    <th>สถานะ</th> <!-- ✅ เพิ่ม -->
                                     <th>ราคา</th>
                                     <th>หน่วย</th>
-                                    <th>ลบ</th>
+                                    <th>ลบ</th>     
                                 </tr>
                             </thead>
                             <tbody id="selected-courses-table-body">
@@ -461,21 +462,23 @@
             
             // Initial fetches
 
-            function renderSelectedCourses() {
-                selectedCoursesTable.innerHTML = ''; // Clear existing rows
-                if (selectedCourses.length === 0) {
-                    const noDataRow = document.createElement('tr');
-                    noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
-                    selectedCoursesTable.appendChild(noDataRow);
-                    return;
-                }
+           function renderSelectedCourses() {
+  selectedCoursesTable.innerHTML = '';
+  if (selectedCourses.length === 0) {
+    const noDataRow = document.createElement('tr');
+    noDataRow.innerHTML = `<td colspan="6" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
+    selectedCoursesTable.appendChild(noDataRow);
+    return;
+  }
 
-                selectedCourses.forEach((course, index) => {
-    const tr = document.createElement('tr'); // ✅ ต้องมีบรรทัดนี้
+    selectedCourses.forEach((course, index) => {
+    const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${course.course_code}</td>
       <td>${course.course_name}</td>
-      <td>${course.price} ${course.unit}</td>
+      <td>${course.status || '-'}</td> <!-- ✅ แสดงสถานะ -->
+      <td>${course.price}</td>
+      <td>${course.unit}</td>
       <td>
         <button onclick="removeCourse(${index})" class="bg-red-500 text-white px-2 py-1 rounded">ลบ</button>
       </td>
