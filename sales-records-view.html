@@ -457,6 +457,9 @@
             let selectedCourses = []; // Stores courses currently added to the table
             let originalNickname = ''; // To track if nickname was changed from database
 
+            renderSelectedCourses();
+            calculateTotals();
+
             // Utility function to display messages
             function displayMessage(message, type = "info") {
                 infoMessageBox.textContent = message;
@@ -615,27 +618,33 @@ const idCard = studentIdCardInput.value.trim();
 });
 
 addCourseButton.addEventListener('click', () => {
-                const selectedCourseCode = courseSelect.value;
-                if (!selectedCourseCode) {
-                    displayMessage('กรุณาเลือกวิชาที่ต้องการเพิ่ม', 'info');
-                    return;
-                }
+    const selectedCourseCode = courseSelect.value;
+    if (!selectedCourseCode) {
+        displayMessage('กรุณาเลือกวิชาที่ต้องการเพิ่ม', 'info');
+        return;
+    }
 
-                const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
+    const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
 
-                if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-                    selectedCourses.push(courseToAdd);
-                    renderSelectedCourses();
-                    calculateTotals();
-                } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-                } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-                    displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
-                }
-            });
+    if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+        selectedCourses.push(courseToAdd);
+        renderSelectedCourses(); // ✅ เพิ่มการแสดง
+        calculateTotals();       // ✅ คำนวณยอด
+    } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+        displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
+    }
+});
 
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.remove-course-button')) {
+    const courseCode = e.target.closest('.remove-course-button').dataset.courseCode;
+    selectedCourses = selectedCourses.filter(course => course.course_code !== courseCode);
+    renderSelectedCourses();
+    calculateTotals();
+  }
+});
 
-
-            });
+           });
 
                     
 
