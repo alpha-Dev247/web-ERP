@@ -530,6 +530,16 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
     courseSelect.innerHTML = `<option disabled selected>⏳ กำลังโหลด...</option>`;
     courseSelect.disabled = true;
 
+    Swal.fire({
+  title: '📚 กำลังโหลดวิชาจากฐานข้อมูล...',
+  allowOutsideClick: false,
+  allowEscapeKey: false,
+  didOpen: () => {
+    Swal.showLoading();
+  }
+});
+
+
   try {
     const res = await fetch(url.toString());
     const data = await res.json();
@@ -539,6 +549,8 @@ const branchMapped = branch === 'megabangna' || branch === 'megabangna-off-accou
     courseSelect.disabled = false;
 
     if (data && data.length > 0) {
+
+        Swal.close();
       availableCourses = data.map(row => ({
         course_code: row['รหัสวิชา'],
         course_name: row['ชื่อคอร์ส'],
