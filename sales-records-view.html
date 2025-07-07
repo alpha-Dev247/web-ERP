@@ -417,7 +417,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
 
-            const selectedCoursesTableBody = document.getElementById('selected-courses-table-body');          
+            const selectedCoursesTable = document.getElementById('selectedCoursesTable');
+          
             const GOOGLE_SHEET_SALES_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWtZcyQIUQNxexbxEYSrjjEb955nnhtuRiuWJ9MRb5RyH6lu_SDhddI7tiOJ2IXYGN/exec';
 
             // IMPORTANT: Replace with your deployed Google Apps Script Web App URL for COURSE DATA
@@ -461,27 +462,27 @@
             // Initial fetches
 
             function renderSelectedCourses() {
-                selectedCoursesTableBody.innerHTML = ''; // Clear existing rows
+                selectedCoursesTable.innerHTML = ''; // Clear existing rows
                 if (selectedCourses.length === 0) {
                     const noDataRow = document.createElement('tr');
                     noDataRow.innerHTML = `<td colspan="5" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
-                    selectedCoursesTableBody.appendChild(noDataRow);
+                    selectedCoursesTable.appendChild(noDataRow);
                     return;
                 }
 
-                selectedCourses.forEach(course => {
-                    tr.innerHTML = `
-                    <td>${course.course_code}</td>
-                    <td>${course.course_name}</td>
-                    <td>${course.price.toLocaleString()}</td>
-                    <td>${course.unit}</td>
-                    <td>${course.status || '-'}</td> <!-- ✅ เพิ่มตรงนี้ -->
-                    <td><button class="text-red-500 hover:text-red-700 remove-course-button" data-course-code="${course.course_code}"><i class="fas fa-trash"></i></button></td>
-                `;
-
-                    selectedCoursesTableBody.appendChild(tr);
-                });
-            }
+                selectedCourses.forEach((course, index) => {
+    const tr = document.createElement('tr'); // ✅ ต้องมีบรรทัดนี้
+    tr.innerHTML = `
+      <td>${course.course_code}</td>
+      <td>${course.course_name}</td>
+      <td>${course.price} ${course.unit}</td>
+      <td>
+        <button onclick="removeCourse(${index})" class="bg-red-500 text-white px-2 py-1 rounded">ลบ</button>
+      </td>
+    `;
+    selectedCoursesTable.appendChild(tr);
+  });
+}
 
              function calculateTotals() {
                 let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
