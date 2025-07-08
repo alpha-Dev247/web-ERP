@@ -693,6 +693,9 @@ async function fetchStudentDetails(searchType, searchValue) {
     Swal.close(); // 🛑 ปิด Loading ตอนเกิด error ด้วย
     Swal.fire('❌ เกิดข้อผิดพลาด', error.message, 'error');
   }
+    renderSelectedCourses();  // ✅ เพิ่มถ้ามีข้อมูลวิชาเดิมในอนาคต
+    applyPromotionDiscount(); // ✅ เรียกโปรโมชั่นใหม่
+
 }
 
 
@@ -815,6 +818,42 @@ document.addEventListener('click', function(e) {
   }
 });
 
+// ✅ ปุ่ม reset form
+document.getElementById('reset-form-button').addEventListener('click', () => {
+  studentIdCardInput.value = '';
+  studentCodeInput.value = '';
+  studentNameInput.value = '';
+  studentSurnameInput.value = '';
+  studentNicknameInput.value = '';
+  originalNickname = '';
+
+  studentStatusInput.value = '';
+  applicationTypeInput.value = '';
+  academicYearInput.value = '';
+  branchInput.value = '';
+  applicationDateInput.value = '';
+  programInput.value = '';
+  seasonInput.value = '';
+  classInput.value = '';
+
+  promotionInput.value = '0';
+  discountInput.value = '';
+  paymentMethodInput.value = '';
+  notesInput.value = '';
+  totalAmountInput.value = '';
+  feesInput.value = '';
+  netAmountInput.value = '';
+
+  selectedCourses = [];
+  renderSelectedCourses();
+  applyPromotionDiscount();
+
+  Swal.fire('🔄 เคลียร์ฟอร์มเรียบร้อยแล้ว', '', 'success');
+});
+
+
+
+
            });
 
                     
@@ -905,6 +944,10 @@ document.addEventListener('click', function(e) {
 
                     if (result.success) {
                         displayMessage('บันทึกข้อมูลการขายสำเร็จ!', 'success');
+                        selectedCourses = [];
+                        renderSelectedCourses();
+                        applyPromotionDiscount();
+
                         // Optionally, clear the form or reset state after successful save
                     } else {
                         displayMessage(`บันทึกข้อมูลการขายไม่สำเร็จ: ${result.error || 'Unknown error'}`, 'error');
@@ -915,6 +958,9 @@ document.addEventListener('click', function(e) {
                 }
             });
 </script>
+<div class="mt-4 flex justify-center">
+    <button id="reset-form-button" class="detail-action-button outline">🔄 ล้างฟอร์ม</button>
+</div>
 
 </body>
 </html>
