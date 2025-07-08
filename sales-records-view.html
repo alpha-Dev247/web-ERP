@@ -646,6 +646,7 @@ async function fetchStudentDetails(searchType, searchValue) {
     url.searchParams.append(searchType, searchValue);
     const response = await fetch(url.toString());
     const data = await response.json();
+    console.log('RAW ROWS:', data);
 
     Swal.close(); // 🟢 ปิด loading เสมอก่อนแสดงผล
 
