@@ -390,11 +390,16 @@
             </div>
             
             <!-- Save button (placed outside the grid for full width control) -->
-            <div class="mt-8 col-span-full flex justify-center">
-                <button id="save-button" class="detail-action-button bg-blue-600 hover:bg-blue-700 w-full md:w-auto px-8 py-3 rounded-xl shadow-lg">
-                    <i class="fas fa-save mr-2"></i> บันทึก
-                </button>
-            </div>
+           <div class="mt-4 col-span-full flex flex-col md:flex-row justify-center gap-4">
+    <button id="save-button" class="detail-action-button bg-blue-600 hover:bg-blue-700 w-full md:w-auto px-8 py-3 rounded-xl shadow-lg">
+        <i class="fas fa-save mr-2"></i> บันทึก
+    </button>
+
+    <button id="reset-form-button" class="detail-action-button bg-red-500 hover:bg-red-600 w-full md:w-auto px-8 py-3 rounded-xl shadow-lg">
+        <i class="fas fa-trash-alt mr-2"></i> ล้างฟอร์ม
+    </button>
+</div>
+
 
         </div>
     </div>
@@ -819,37 +824,53 @@ document.addEventListener('click', function(e) {
 });
 
 // ✅ ปุ่ม reset form
-document.getElementById('reset-form-button').addEventListener('click', () => {
-  studentIdCardInput.value = '';
-  studentCodeInput.value = '';
-  studentNameInput.value = '';
-  studentSurnameInput.value = '';
-  studentNicknameInput.value = '';
-  originalNickname = '';
+document.getElementById('reset-form-button').addEventListener('click', async () => {
+  const confirm = await Swal.fire({
+    title: 'คุณแน่ใจหรือไม่?',
+    text: "คุณต้องการล้างข้อมูลทั้งหมดในฟอร์มหรือไม่?",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'ใช่, ล้างข้อมูล',
+    cancelButtonText: 'ยกเลิก'
+  });
 
-  studentStatusInput.value = '';
-  applicationTypeInput.value = '';
-  academicYearInput.value = '';
-  branchInput.value = '';
-  applicationDateInput.value = '';
-  programInput.value = '';
-  seasonInput.value = '';
-  classInput.value = '';
+  if (confirm.isConfirmed) {
+    // เคลียร์ฟอร์ม
+    studentIdCardInput.value = '';
+    studentCodeInput.value = '';
+    studentNameInput.value = '';
+    studentSurnameInput.value = '';
+    studentNicknameInput.value = '';
+    originalNickname = '';
 
-  promotionInput.value = '0';
-  discountInput.value = '';
-  paymentMethodInput.value = '';
-  notesInput.value = '';
-  totalAmountInput.value = '';
-  feesInput.value = '';
-  netAmountInput.value = '';
+    studentStatusInput.value = '';
+    applicationTypeInput.value = '';
+    academicYearInput.value = '';
+    branchInput.value = '';
+    applicationDateInput.value = '';
+    programInput.value = '';
+    seasonInput.value = '';
+    classInput.value = '';
 
-  selectedCourses = [];
-  renderSelectedCourses();
-  applyPromotionDiscount();
+    promotionInput.value = '0';
+    discountInput.value = '';
+    paymentMethodInput.value = '';
+    notesInput.value = '';
+    totalAmountInput.value = '';
+    feesInput.value = '';
+    netAmountInput.value = '';
 
-  Swal.fire('🔄 เคลียร์ฟอร์มเรียบร้อยแล้ว', '', 'success');
+    selectedCourses = [];
+    availableCourses = [];
+    courseSelect.innerHTML = `<option value="">--- เลือกวิชา ---</option>`;
+
+    renderSelectedCourses();
+    applyPromotionDiscount();
+
+    Swal.fire('🧹 เคลียร์ข้อมูลเรียบร้อย', '', 'success');
+  }
 });
+
 
 
 
@@ -958,9 +979,8 @@ document.getElementById('reset-form-button').addEventListener('click', () => {
                 }
             });
 </script>
-<div class="mt-4 flex justify-center">
-    <button id="reset-form-button" class="detail-action-button outline">🔄 ล้างฟอร์ม</button>
-</div>
+
+
 
 </body>
 </html>
