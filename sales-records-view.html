@@ -480,7 +480,7 @@
       <td>${course.price}</td>
       <td>${course.unit}</td>
       <td>
-        <button onclick="removeCourse(${index})" class="bg-red-500 text-white px-2 py-1 rounded">ลบ</button>
+      <button class="remove-course-button" data-index="${index}">ลบ</button>
       </td>
     `;
     selectedCoursesTable.appendChild(tr);
@@ -893,6 +893,12 @@ document.addEventListener('click', function(e) {
                     displayMessage(`ไม่สามารถบันทึกข้อมูลการขายได้: ${error.message}.`, 'error');
                 }
             });
+// ✅ เพิ่มฟังก์ชันนี้ใน <script> ด้านล่างสุด
+    function removeCourse(index) {
+    selectedCourses.splice(index, 1);         // ลบออกจาก array
+    renderSelectedCourses();                  // แสดงใหม่
+    calculateTotals();                        // คำนวณยอดใหม่
+}
 
            
 
