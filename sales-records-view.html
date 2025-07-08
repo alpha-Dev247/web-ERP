@@ -602,6 +602,12 @@ function populateCourseDropdown() {
   });
 }
 
+    function removeCourse(index) {
+    selectedCourses.splice(index, 1);         // ลบออกจาก array
+    renderSelectedCourses();                  // แสดงใหม่
+    calculateTotals();                        // คำนวณยอดใหม่
+}
+
 
 
 
@@ -894,11 +900,7 @@ document.addEventListener('click', function(e) {
                 }
             });
 // ✅ เพิ่มฟังก์ชันนี้ใน <script> ด้านล่างสุด
-    function removeCourse(index) {
-    selectedCourses.splice(index, 1);         // ลบออกจาก array
-    renderSelectedCourses();                  // แสดงใหม่
-    calculateTotals();                        // คำนวณยอดใหม่
-}
+
 
            
 
