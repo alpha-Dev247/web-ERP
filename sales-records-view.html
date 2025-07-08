@@ -379,8 +379,8 @@
                         <input type="text" id="total-amount" class="form-field" readonly>
                     </div>
                     <div>
-                        <label for="fees" class="form-label">ค่าธรรมเนียม</label>
-                        <input type="text" id="fees" class="form-field" placeholder="กรอกค่าธรรมเนียม">
+                        <label for="fees" class="form-label">ค่าธรรมเนียม (เฉพาะบัตรเครดิต)</label>
+                        <input type="text" id="fees" class="form-field" readonly>
                     </div>
                     <div>
                         <label for="net-amount" class="form-label">สุทธิ</label>
@@ -481,25 +481,26 @@
 
 
 function calculateTotals() {
-  let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
+  const sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
   totalAmountInput.value = sum.toLocaleString();
 
-  const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
-  const promo = parseFloat(promotionInput.value.replace(/[^\d.-]/g, '')) || 0;
-  const dis = parseFloat(discountInput.value.replace(/[^\d.-]/g, '')) || 0;
+  const promo = parseFloat(promotionInput.value.replace(/,/g, '')) || 0;
+  const dis = parseFloat(discountInput.value.replace(/,/g, '')) || 0;
 
-  let net = sum - promo - dis;
+  let base = sum - promo - dis;
+  let fee = 0;
 
   const paymentType = paymentMethodInput.value;
   if (paymentType === 'credit') {
-    const creditFee = net * 0.03;
-    net += creditFee;
+    fee = base * 0.03;
   }
 
-  net -= fees;
+  const net = base + fee;
 
+  feesInput.value = Math.round(fee).toLocaleString(); // ✅ แสดงค่าธรรมเนียมอัตโนมัติ
   netAmountInput.value = Math.round(net).toLocaleString();
 }
+
 
 
 
@@ -818,7 +819,8 @@ addCourseButton.addEventListener('click', () => {
     if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
     selectedCourses.push(courseToAdd);
     renderSelectedCourses();
-    applyPromotionDiscount(); // ✅ เรียกโปรโมชั่น
+    applyPromotionDiscount();
+    calculateTotals();
 }
  else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
         displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
@@ -831,8 +833,16 @@ document.addEventListener('click', function(e) {
     selectedCourses = selectedCourses.filter(course => course.course_code !== courseCode);
     renderSelectedCourses();
     applyPromotionDiscount();
+    calculateTotals();
   }
 });
+
+discountInput.addEventListener('input', calculateTotals);
+promotionInput.addEventListener('input', calculateTotals);
+paymentMethodInput.addEventListener('change', calculateTotals);
+
+
+
 
 // ✅ ปุ่ม reset form
 document.getElementById('reset-form-button').addEventListener('click', async () => {
@@ -885,9 +895,7 @@ document.getElementById('reset-form-button').addEventListener('click', async () 
            });
 
 
-            feesInput.addEventListener('input', calculateTotals);
-            discountInput.addEventListener('input', calculateTotals);
-            paymentMethodInput.addEventListener('change', calculateTotals);
+           
 
 
             // Save button functionality
