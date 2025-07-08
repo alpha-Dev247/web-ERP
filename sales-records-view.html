@@ -488,8 +488,19 @@ function calculateTotals() {
   const promo = parseFloat(promotionInput.value.replace(/[^\d.-]/g, '')) || 0;
   const dis = parseFloat(discountInput.value.replace(/[^\d.-]/g, '')) || 0;
 
-  netAmountInput.value = (sum - fees - promo - dis).toLocaleString();
+  let net = sum - promo - dis;
+
+  const paymentType = paymentMethodInput.value;
+  if (paymentType === 'credit') {
+    const creditFee = net * 0.03;
+    net += creditFee;
+  }
+
+  net -= fees;
+
+  netAmountInput.value = Math.round(net).toLocaleString();
 }
+
 
 
             function applyPromotionDiscount() {
@@ -871,21 +882,13 @@ document.getElementById('reset-form-button').addEventListener('click', async () 
   }
 });
 
-
-
-
-
            });
-
-                    
-
-                
-
-            // Basic calculation for total amount and net amount
-           
 
 
             feesInput.addEventListener('input', calculateTotals);
+            discountInput.addEventListener('input', calculateTotals);
+            paymentMethodInput.addEventListener('change', calculateTotals);
+
 
             // Save button functionality
             saveButton.addEventListener('click', async () => {
