@@ -486,9 +486,9 @@ function calculateTotals() {
 
   const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
   const promo = parseFloat(promotionInput.value.replace(/[^\d.-]/g, '')) || 0;
+  const dis = parseFloat(discountInput.value.replace(/[^\d.-]/g, '')) || 0;
 
-
-  netAmountInput.value = (sum - fees - promo).toLocaleString();
+  netAmountInput.value = (sum - fees - promo - dis).toLocaleString();
 }
 
 
