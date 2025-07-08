@@ -348,7 +348,7 @@
                 <div class="space-y-4">
                     <div>
                         <label for="promotion" class="form-label">โปรโมชัน</label>
-                        <input type="text" id="promotion" class="form-field" placeholder="กรอกโปรโมชัน">
+                        <input type="text" id="promotion" class="form-field" placeholder="กรอกโปรโมชัน" readonly>
                     </div>
                     <div>
                         <label for="discount" class="form-label">ส่วนลดพิเศษ</label>
@@ -475,13 +475,31 @@
 }
 
 
-             function calculateTotals() {
-                let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
-                totalAmountInput.value = sum.toLocaleString(); // Format with commas
+function calculateTotals() {
+  let sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
+  totalAmountInput.value = sum.toLocaleString();
 
-                const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
-                netAmountInput.value = (sum - fees).toLocaleString();
-            }
+  const fees = parseFloat(feesInput.value.replace(/,/g, '')) || 0;
+  const promo = parseFloat(promotionInput.value.replace(/,/g, '')) || 0;
+
+  netAmountInput.value = (sum - fees - promo).toLocaleString();
+}
+
+
+            function applyPromotionDiscount() {
+  const promoInput = document.getElementById('promotion');
+  const courseCount = selectedCourses.length;
+  let promoAmount = 0;
+
+  if (courseCount === 2) promoAmount = 500;
+  else if (courseCount === 3) promoAmount = 1000;
+  else if (courseCount === 4) promoAmount = 1500;
+  else if (courseCount >= 5) promoAmount = 2000;
+
+  promoInput.value = promoAmount.toLocaleString(); // format 1,000
+  calculateTotals(); // คำนวณยอดรวมใหม่
+}
+
 
             
           
@@ -587,7 +605,7 @@ selectedCoursesTable.addEventListener('click', function(e) {
     if (!isNaN(index)) {
       selectedCourses.splice(index, 1);
       renderSelectedCourses();
-      calculateTotals();
+      applyPromotionDiscount();
     }
   }
 });
@@ -778,10 +796,11 @@ addCourseButton.addEventListener('click', () => {
     const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
 
     if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-        selectedCourses.push(courseToAdd);
-        renderSelectedCourses(); // ✅ เพิ่มการแสดง
-        calculateTotals();       // ✅ คำนวณยอด
-    } else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+    selectedCourses.push(courseToAdd);
+    renderSelectedCourses();
+    applyPromotionDiscount(); // ✅ เรียกโปรโมชั่น
+}
+ else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
         displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
     }
 });
@@ -791,7 +810,7 @@ document.addEventListener('click', function(e) {
     const courseCode = e.target.closest('.remove-course-button').dataset.courseCode;
     selectedCourses = selectedCourses.filter(course => course.course_code !== courseCode);
     renderSelectedCourses();
-    calculateTotals();
+    applyPromotionDiscount();
   }
 });
 
