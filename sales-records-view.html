@@ -167,6 +167,33 @@
         .message-box.info { background-color: #3b82f6; } /* blue-500 */
         .message-box.success { background-color: #22c55e; } /* green-500 */
         .message-box.error { background-color: #ef4444; } /* red-500 */
+    
+@media print {
+  .hidden { display: block !important; }
+  body * {
+    visibility: hidden !important;
+  }
+  #receipt-preview, #receipt-preview * {
+    visibility: visible !important;
+  }
+  #receipt-preview {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    min-height: 0 !important;
+    height: auto !important;
+    background: white !important;
+    padding: 24px !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+}
+
+
+
+    
     </style>
 </head>
 <body class="p-8">
@@ -273,7 +300,7 @@
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
-                            <option value="All">ทั้งปี</option>
+                            <option value="ทั้งปี">ทั้งปี</option>
                         </select>
                     </div>
                     <div>
@@ -388,6 +415,18 @@
                     </div>
                 </div>
             </div>
+<!-- Section: ใบเสร็จเบื้องต้น -->
+<div class="card lg:col-span-2 lg:col-start-3 lg:row-start-2 flex flex-col">
+  <h2 class="section-header" >🧾 ใบเสร็จเบื้องต้น</h2>
+  <div id="receipt-preview-preview" class="text-sm space-y text-gray-800 ">
+    <!-- JavaScript จะมาเติมตรงนี้ -->
+  </div>
+</div>
+
+
+
+
+
             
             <!-- Save button (placed outside the grid for full width control) -->
            <div class="mt-4 col-span-full flex flex-col md:flex-row justify-center gap-4">
@@ -398,16 +437,51 @@
     <button id="reset-form-button" class="detail-action-button bg-red-500 hover:bg-red-600 w-full md:w-auto px-8 py-3 rounded-xl shadow-lg">
         <i class="fas fa-trash-alt mr-2"></i> ล้างฟอร์ม
     </button>
-</div>
 
+    <button id="preview-receipt-button" class="detail-action-button bg-gray-600 hover:bg-gray-700 w-full md:w-auto px-8 py-3 rounded-xl shadow-lg">
+  🧾 แสดงใบเสร็จ
+    </button>
+</div>
 
         </div>
     </div>
+
+    <!-- Receipt Print Area (for printing only) -->
+    <div id="receipt-preview" class="print-area hidden">
+      <!-- Will be filled by printReceipt() -->
+    </div>
+    <!-- ปุ่มพิมพ์ใบเสร็จ (outside grid, at bottom) -->
+    <div class="flex justify-center mt-4">
+      <button onclick="printReceipt()" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow-md">
+  🖨️ พิมพ์ใบเสร็จ
+</button>
+    </div>
+
+
 
     <!-- Message box for notifications -->
     <div id="infoMessageBox" class="message-box"></div>
    
     <script>
+
+        window.selectedCourses = [];
+        
+let lastRunningNumber = {
+  '1A': 220,
+  '2A': 17
+};
+const studentNameInput = document.getElementById('firstName');
+const studentSurnameInput = document.getElementById('lastName');
+const applicationDateInput = document.getElementById('application-date');
+const branchInput = document.getElementById('branch');
+const academicYearInput = document.getElementById('academicYear');
+const notesInput = document.getElementById('notes');
+const totalAmountInput = document.getElementById('total-amount');
+const discountInput = document.getElementById('discount');
+const feesInput = document.getElementById('fees');
+const netAmountInput = document.getElementById('net-amount');
+const paymentMethodInput = document.getElementById('payment-method');
+
         document.addEventListener('DOMContentLoaded', () => {
 
             const selectedCoursesTable = document.getElementById('selectedCoursesTable');
@@ -448,7 +522,7 @@
             
 
             let availableCourses = []; // Stores all fetched course data
-            let selectedCourses = []; // Stores courses currently added to the table
+             // Stores courses currently added to the table
             let originalNickname = ''; // To track if nickname was changed from database
 
             
@@ -456,14 +530,14 @@
 
  function renderSelectedCourses() {
   selectedCoursesTable.innerHTML = '';
-  if (selectedCourses.length === 0) {
+  if (window.selectedCourses.length === 0) {
     const noDataRow = document.createElement('tr');
     noDataRow.innerHTML = `<td colspan="6" class="text-center text-gray-500 py-4">ยังไม่มีวิชาที่เลือก</td>`;
     selectedCoursesTable.appendChild(noDataRow);
     return;
   }
 
-  selectedCourses.forEach((course, index) => {
+  window.selectedCourses.forEach((course, index) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${course.course_code}</td>
@@ -481,7 +555,7 @@
 
 
 function calculateTotals() {
-  const sum = selectedCourses.reduce((acc, course) => acc + course.price, 0);
+  const sum = window.selectedCourses.reduce((acc, course) => acc + course.price, 0);
   totalAmountInput.value = sum.toLocaleString();
 
   const promo = parseFloat(promotionInput.value.replace(/,/g, '')) || 0;
@@ -506,7 +580,7 @@ function calculateTotals() {
 
             function applyPromotionDiscount() {
   const promoInput = document.getElementById('promotion');
-  const courseCount = selectedCourses.length;
+  const courseCount = window.selectedCourses.length;
   let promoAmount = 0;
 
   if (courseCount === 2) promoAmount = 500;
@@ -621,7 +695,7 @@ selectedCoursesTable.addEventListener('click', function(e) {
   if (e.target.classList.contains('remove-course-button')) {
     const index = parseInt(e.target.dataset.index);
     if (!isNaN(index)) {
-      selectedCourses.splice(index, 1);
+      window.selectedCourses.splice(index, 1);
       renderSelectedCourses();
       applyPromotionDiscount();
     }
@@ -816,13 +890,13 @@ addCourseButton.addEventListener('click', () => {
 
     const courseToAdd = availableCourses.find(course => course.course_code === selectedCourseCode);
 
-    if (courseToAdd && !selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
-    selectedCourses.push(courseToAdd);
+    if (courseToAdd && !window.selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+    window.selectedCourses.push(courseToAdd);
     renderSelectedCourses();
     applyPromotionDiscount();
     calculateTotals();
 }
- else if (selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
+ else if (window.selectedCourses.some(c => c.course_code === courseToAdd.course_code)) {
         displayMessage('วิชานี้ถูกเพิ่มไปแล้ว', 'info');
     }
 });
@@ -830,7 +904,7 @@ addCourseButton.addEventListener('click', () => {
 document.addEventListener('click', function(e) {
   if (e.target.closest('.remove-course-button')) {
     const courseCode = e.target.closest('.remove-course-button').dataset.courseCode;
-    selectedCourses = selectedCourses.filter(course => course.course_code !== courseCode);
+    window.selectedCourses = window.selectedCourses.filter(course => course.course_code !== courseCode);
     renderSelectedCourses();
     applyPromotionDiscount();
     calculateTotals();
@@ -881,7 +955,7 @@ document.getElementById('reset-form-button').addEventListener('click', async () 
     feesInput.value = '';
     netAmountInput.value = '';
 
-    selectedCourses = [];
+    window.selectedCourses = [];
     availableCourses = [];
     courseSelect.innerHTML = `<option value="">--- เลือกวิชา ---</option>`;
 
@@ -892,12 +966,184 @@ document.getElementById('reset-form-button').addEventListener('click', async () 
   }
 });
 
+document.getElementById('preview-receipt-button').addEventListener('click', () => {
+  const receiptDiv = document.getElementById('receipt-preview-preview');
+  const receiptNumber = generateReceiptNumber(branchInput.value.trim(), academicYearInput.value.trim());
+  const studentInfo = `
+    <div><strong>เลขที่ใบเสร็จ:</strong> ${receiptNumber}</div>
+    <div><strong>วันที่:</strong> ${applicationDateInput.value}</div>
+    <div><strong>ชื่อ:</strong> ${studentNameInput.value} ${studentSurnameInput.value}</div>
+    <div><strong>ชื่อเล่น:</strong> ${studentNicknameInput.value}</div>
+    <div><strong>รหัสนักเรียน:</strong> ${studentCodeInput.value}</div>
+    <div><strong>เลขบัตร:</strong> ${studentIdCardInput.value}</div>
+  `;
+
+  const courseList = window.selectedCourses.map(c => `
+    <tr>
+      <td class="border px-2 py-1">${c.course_code}</td>
+      <td class="border px-2 py-1">${c.course_name}</td>
+      <td class="border px-2 py-1 text-right">${c.price.toLocaleString()} บาท</td>
+    </tr>
+  `).join('');
+
+  const courseTable = `
+    <table class="w-full text-left text-sm border-collapse mt-4">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border px-2 py-1">รหัส</th>
+          <th class="border px-2 py-1">ชื่อวิชา</th>
+          <th class="border px-2 py-1 text-right">ราคา</th>
+        </tr>
+      </thead>
+      <tbody>${courseList}</tbody>
+    </table>
+  `;
+
+  const summary = `
+    <div class="mt-4 border-t pt-4">
+      <div><strong>ยอดรวม:</strong> ${totalAmountInput.value} บาท</div>
+      <div><strong>โปรโมชัน:</strong> ${promotionInput.value} บาท</div>
+      <div><strong>ส่วนลดพิเศษ:</strong> ${discountInput.value} บาท</div>
+      <div><strong>ค่าธรรมเนียม:</strong> ${feesInput.value} บาท</div>
+      <div class="text-lg font-bold"><strong>สุทธิ:</strong> ${netAmountInput.value} บาท</div>
+    </div>
+  `;
+
+  receiptDiv.innerHTML = `${studentInfo}${courseTable}${summary}`;
+  receiptDiv.scrollIntoView({ behavior: 'smooth' });
+});
+
+
            });
 
+      function generateReceiptNumber(branch, year) {
+  const branchPrefix =  branch === 'megabangna' || branch === 'megabangna-off-account' ? '1A' :
+                        branch === 'sukhapiban3' || branch === 'sukhapiban3-off-account' ? '2A' : '';
+  const yearSuffix = year.slice(-2); // เช่น "2568" → "68"
+  const run = lastRunningNumber[branchPrefix]++;
+  const runStr = run.toString().padStart(4, '0');
+  return `${branchPrefix}${yearSuffix}${runStr}`;
+}
 
-           
 
 
+
+function printReceipt() {
+  // Get the receipt preview div
+const receiptDiv = document.getElementById('receipt-preview');
+const logoUrl = "https://drive.google.com/uc?export=view&id=1vqOEp9DqFNqw0kp89u4ziznZuuaGDuy9";
+ 
+const receiptNumber = typeof generateReceiptNumber === 'function'
+    ? generateReceiptNumber(branchInput.value.trim(), academicYearInput.value.trim())
+    : '-';
+  // Build the receipt content
+  const studentName = document.getElementById('firstName').value + ' ' + document.getElementById('lastName').value;
+  const studentCode = document.getElementById('studentCode').value;
+  const idCard = document.getElementById('idCard').value;
+  const nickname = document.getElementById('nickname').value;
+  const applicationDate = document.getElementById('application-date').value;
+
+  // Build course list
+ const courseRows = window.selectedCourses.map((c, i) => `
+    <tr>
+      <td style="border:1px solid #222; padding:6px; text-align:center;">${i+1}</td>
+      <td style="border:1px solid #222; padding:6px;">${c.course_code}</td>
+      <td style="border:1px solid #222; padding:6px;">${c.course_name}</td>
+      <td style="border:1px solid #222; padding:6px; text-align:right;">${c.price.toLocaleString()} บาท</td>
+    </tr>
+  `).join('');
+
+  receiptDiv.innerHTML = `
+    <div style="width:700px; margin:0 auto; font-family:Arial,sans-serif; color:#222;">
+      <div style="display:flex; align-items:flex-start;">
+        <img src="${logoUrl}" style="height:60px; margin-right:16px;">
+        <div style="flex:1;">
+          <div style="font-weight:bold; font-size:18px;">อัลฟ่า ติวเตอร์</div>
+          <div>สาขา เมกาบางนา</div>
+          <div>30/98 หมู่บ้านกลางกรุงฯ...</div>
+          <div>alphatofschool@gmail.com</div>
+          <div>02-125-3183</div>
+        </div>
+      </div>
+      <div style="text-align:center; margin:24px 0 8px 0;">
+        <div style="font-size:22px; font-weight:bold;">ใบเสร็จรับเงิน</div>
+        <div style="font-size:14px;">RECEIPT</div>
+      </div>
+      <table style="width:100%; border:1px solid #222; border-collapse:collapse; margin-bottom:8px;">
+        <tr>
+          <td style="border:1px solid #222; padding:6px; width:50%;">
+            ลูกค้า<br><span style="font-size:12px;">CUSTOMER</span>
+          </td>
+          <td style="border:1px solid #222; padding:6px; width:25%;">
+            เลขที่ใบเสร็จ<br><span style="font-size:12px;">RECEIPT NO.</span>
+          </td>
+          <td style="border:1px solid #222; padding:6px; width:25%;">
+            วันที่<br><span style="font-size:12px;">DATE</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #222; padding:6px;">
+            ${studentNameInput.value} ${studentSurnameInput.value}
+          </td>
+          <td style="border:1px solid #222; padding:6px;">
+            ${receiptNumber}
+          </td>
+          <td style="border:1px solid #222; padding:6px;">
+            ${applicationDateInput.value}
+          </td>
+        </tr>
+      </table>
+      <table style="width:100%; border:1px solid #222; border-collapse:collapse; margin-bottom:8px;">
+        <thead>
+          <tr>
+            <th style="border:1px solid #222; padding:6px;">ลำดับ<br><span style="font-size:12px;">NO</span></th>
+            <th style="border:1px solid #222; padding:6px;">รหัสวิชา<br><span style="font-size:12px;">CODE</span></th>
+            <th style="border:1px solid #222; padding:6px;">รายละเอียด<br><span style="font-size:12px;">DESCRIPTION</span></th>
+            <th style="border:1px solid #222; padding:6px;">จำนวนเงิน (THB)<br><span style="font-size:12px;">AMOUNT</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${courseRows}
+        </tbody>
+      </table>
+      <div style="display:flex; justify-content:space-between; margin-top:16px;">
+        <div>
+          <div>จำนวนเงิน AMOUNT: <b>${totalAmountInput.value} บาท</b></div>
+          <div style="margin-top:8px;">
+            <input type="checkbox" ${paymentMethodInput.value === "transfer" ? "checked" : ""}> โอน TRANSFER
+            <input type="checkbox" ${paymentMethodInput.value === "credit" ? "checked" : ""} style="margin-left:16px;"> บัตรเครดิต CREDIT CARD
+          </div>
+        </div>
+        <table style="border:1px solid #222; border-collapse:collapse; min-width:200px;">
+          <tr><td style="border:1px solid #222; padding:6px;">ยอดรวม<br>SUB TOTAL</td><td style="border:1px solid #222; padding:6px; text-align:right;">${totalAmountInput.value} บาท</td></tr>
+          <tr><td style="border:1px solid #222; padding:6px;">ส่วนลด<br>DISCOUNT</td><td style="border:1px solid #222; padding:6px; text-align:right;">${discountInput.value} บาท</td></tr>
+          <tr><td style="border:1px solid #222; padding:6px;">ค่าธรรมเนียม<br>FEE</td><td style="border:1px solid #222; padding:6px; text-align:right;">${feesInput.value} บาท</td></tr>
+          <tr><td style="border:1px solid #222; padding:6px;">สุทธิ<br>NET TOTAL</td><td style="border:1px solid #222; padding:6px; text-align:right;">${netAmountInput.value} บาท</td></tr>
+        </table>
+      </div>
+      <div style="margin-top:24px;">
+        หมายเหตุ<br>
+        <div style="border:1px solid #222; min-height:40px; padding:6px;">${notesInput.value}</div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-top:32px;">
+        <div style="text-align:center;">
+          <div>ผู้รับเงิน<br>COLLECTOR</div>
+          <div style="height:40px;"></div>
+          <div>__________________________</div>
+        </div>
+        <div style="width:32px;"></div>
+        <div style="text-align:center;">
+          <div>AUTHORIZED BY</div>
+          <div style="height:40px;"></div>
+          <div>__________________________</div>
+        </div>
+      </div>
+    </div>
+  `;
+  receiptDiv.classList.remove('hidden');
+  window.print();
+  setTimeout(() => receiptDiv.classList.add('hidden'), 1000);
+}
             // Save button functionality
             saveButton.addEventListener('click', async () => {
                 const idCard = studentIdCardInput.value.trim();
@@ -950,6 +1196,31 @@ document.getElementById('reset-form-button').addEventListener('click', async () 
                     "สุทธิ": document.getElementById("netAmount").value.trim()
                 };
 
+
+// ด้านในฟังก์ชัน save-button click
+
+
+const receiptHTML = `
+  <div><strong>เลขที่ใบเสร็จ:</strong> ${receiptNumber}</div>
+  <div><strong>ชื่อ:</strong> ${salesRecordData["ชื่อจริง"]} ${salesRecordData["นามสกุล"]}</div>
+  <div><strong>ชื่อเล่น:</strong> ${salesRecordData["ชื่อเล่น"]}</div>
+  <div><strong>รหัสนักเรียน:</strong> ${salesRecordData["รหัสนักเรียน"]}</div>
+  <div><strong>วิชาที่สมัคร:</strong></div>
+  <ul class="list-disc pl-5">
+    ${window.selectedCourses.map(c => `<li>${c.course_name} (${c.course_code}) - ${c.price.toLocaleString()} บาท</li>`).join('')}
+  </ul>
+  <div><strong>ยอดรวม:</strong> ${totalAmountInput.value} บาท</div>
+  <div><strong>ส่วนลด:</strong> ${discountInput.value || '0'} บาท</div>
+  <div><strong>โปรโมชัน:</strong> ${promotionInput.value || '0'} บาท</div>
+  <div><strong>ค่าธรรมเนียม:</strong> ${feesInput.value || '0'} บาท</div>
+  <div><strong>ยอดสุทธิ:</strong> ${netAmountInput.value} บาท</div>
+`;
+
+document.getElementById('receipt-preview-preview').innerHTML = receiptHTML;
+document.getElementById('receipt-preview-preview').classList.remove('hidden');
+
+
+
                 
                 // Remove empty fields
                 const filteredData = {};
@@ -976,7 +1247,7 @@ document.getElementById('reset-form-button').addEventListener('click', async () 
 
                     if (result.success) {
                         displayMessage('บันทึกข้อมูลการขายสำเร็จ!', 'success');
-                        selectedCourses = [];
+                        window.selectedCourses = [];
                         renderSelectedCourses();
                         applyPromotionDiscount();
 
@@ -989,6 +1260,57 @@ document.getElementById('reset-form-button').addEventListener('click', async () 
                     displayMessage(`ไม่สามารถบันทึกข้อมูลการขายได้: ${error.message}.`, 'error');
                 }
             });
+
+            
+document.getElementById('print-receipt-button').addEventListener('click', () => {
+  const receiptDiv = document.getElementById('receipt-preview');
+
+  const studentInfo = `
+    <div><strong>วันที่:</strong> ${applicationDateInput.value}</div>
+    <div><strong>ชื่อ:</strong> ${studentNameInput.value} ${studentSurnameInput.value}</div>
+    <div><strong>ชื่อเล่น:</strong> ${studentNicknameInput.value}</div>
+    <div><strong>รหัสนักเรียน:</strong> ${studentCodeInput.value}</div>
+    <div><strong>เลขบัตร:</strong> ${studentIdCardInput.value}</div>
+  `;
+
+  const courseList = (window.selectedCourses || []).map(c => `
+    <tr>
+      <td class="border px-2 py-1">${c.course_code}</td>
+      <td class="border px-2 py-1">${c.course_name}</td>
+      <td class="border px-2 py-1 text-right">${c.price.toLocaleString()} บาท</td>
+    </tr>
+  `).join('');
+
+  const courseTable = `
+    <table class="w-full text-left text-sm border-collapse mt-4">
+      <thead>
+        <tr class="bg-gray-100">
+          <th class="border px-2 py-1">รหัส</th>
+          <th class="border px-2 py-1">ชื่อวิชา</th>
+          <th class="border px-2 py-1 text-right">ราคา</th>
+        </tr>
+      </thead>
+      <tbody>${courseList}</tbody>
+    </table>
+  `;
+
+  const summary = `
+    <div class="mt-4 border-t pt-4">
+      <div><strong>ยอดรวม:</strong> ${totalAmountInput.value} บาท</div>
+      <div><strong>โปรโมชัน:</strong> ${promotionInput.value} บาท</div>
+      <div><strong>ส่วนลดพิเศษ:</strong> ${discountInput.value} บาท</div>
+      <div><strong>ค่าธรรมเนียม:</strong> ${feesInput.value} บาท</div>
+      <div class="text-lg font-bold"><strong>สุทธิ:</strong> ${netAmountInput.value} บาท</div>
+    </div>
+  `;
+
+  receiptDiv.innerHTML = `${studentInfo}${courseTable}${summary}`;
+  receiptDiv.classList.remove('hidden');
+  window.print();
+  setTimeout(() => receiptDiv.classList.add('hidden'), 1000);
+});
+
+
 </script>
 
 
